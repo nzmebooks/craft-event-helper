@@ -41,18 +41,26 @@ class EventHelperController extends Controller
      */
     public function actionIndex()
     {
-        $result = 'Welcome to the DefaultController actionIndex() method';
+        $attendees = EventHelper::$plugin->attendees->getAttendees();
+        $events = EventHelper::$plugin->events->getEvents();
 
-        return $result;
+        $this->renderTemplate('event-helper/home/index', array(
+          'tab' => 'home',
+          'attendees' => $attendees,
+          'events' => $events,
+        ));
     }
 
     /**
      * @return mixed
      */
-    public function actionDoSomething()
+    public function actionSettings()
     {
-        $result = 'Welcome to the DefaultController actionDoSomething() method';
+        $settings = EventHelper::$plugin->getSettings();
 
-        return $result;
+        $this->renderTemplate('event-helper/settings/index', array(
+          'tab' => 'settings',
+          'settings' => $settings,
+        ));
     }
 }

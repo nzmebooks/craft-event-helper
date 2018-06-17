@@ -14,6 +14,8 @@ use nzmebooks\eventhelper\EventHelper;
 
 use Craft;
 use craft\base\Component;
+use craft\helpers\App;
+use craft\helpers\StringHelper;
 
 /**
  * @author    meBooks
@@ -25,13 +27,58 @@ class EventHelperService extends Component
     // Public Methods
     // =========================================================================
 
-    /*
-     * @return mixed
+    /**
+     * Download the export csv.
+     *
+     * @param array $settings
+     *
+     * @return string
+     *
+     * @throws Exception
      */
-    public function exampleService()
+    public function download($data)
     {
-        $result = 'something';
+        // Get max power
+        App::maxPowerCaptain();
 
-        return $result;
+        // Get delimiter
+        $delimiter = ',';
+
+        // Open output buffer
+        ob_start();
+
+        // Write to output stream
+        $export = fopen('php://output', 'w');
+
+        // If there is data, process
+        if (is_array($data) && count($data)) {
+
+            // Loop through data
+             foreach ($data as $fields) {
+
+                // Gather row data
+                $rows = array();
+
+                // Loop through the fields
+                foreach ($fields as $field) {
+
+                    // Encode and add to rows
+                    $rows[] = StringHelper::convertToUTF8($field);
+                }
+
+                // Add rows to export
+                fputcsv($export, $rows, $delimiter);
+            }
+        }
+
+        // Close buffer and return data
+        fclose($export);
+        $data = ob_get_clean();
+
+        // Use windows friendly newlines
+        $data = str_replace("\n", "\r\n", $data);
+
+        // Return the data to controller
+        return $data;
     }
 }

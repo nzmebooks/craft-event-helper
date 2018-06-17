@@ -1,0 +1,93 @@
+{% extends 'event-helper/_layouts' %}
+
+{% set tabs = craft.eventHelper.getCpTabs %}
+
+{% set selectedTab = tab %}
+{% set fullPageForm = true %}
+
+{% block blockContent %}
+    <div class="grid">
+        <div class="item" data-colspan="2">
+            <div class="widget pane">
+                <h2>RSVPs for upcoming events</h2>
+                <div class="body">
+                    <div class="attendees-container">
+                        {% if attendees %}
+                        <table id="test" class="data fullwidth">
+                            <thead>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email Address</th>
+                                <th>Event</th>
+                                <th>RSVP Date</th>
+                                <th>Seats</th>
+                            </thead>
+                            <tbody>
+                                {% for attendee in attendees|slice(0, 500) %}
+                                <tr>
+                                    <td>{{ attendee.id }}</td>
+                                    <td><a href="/admin/users/{{ attendee.userId }}">{{ attendee.name }}</a></td>
+                                    <td>{{ attendee.email }}</td>
+                                    <td><a href="/admin/entries/events/{{ attendee.eventId }}">{{ attendee.title }}</a></td>
+                                    <td>{{ attendee.dateCreated }}</td>
+                                    <td>{{ attendee.seats }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p>It looks like there aren't any RSVPs for any events yet.</p>
+                        {% endif %}
+                    </div><!-- Attendees Container -->
+
+                    <form method="post" action="" class="centered" accept-charset="utf-8">
+                        {{ getCsrfInput() }}
+                        <input type="hidden" name="action" value="event-helper/attendees/downloadupcoming">
+                        <input type="submit" class="btn submit js-btn-export" value="{{ 'Export'|t }}">
+                        <div class="spinner js-export-spinner hidden"></div>
+                    </form>
+
+                </div><!-- Body -->
+            </div><!-- Widget -->
+            <div class="widget pane">
+                <h2>RSVPs for past events</h2>
+                <div class="body">
+                    <form method="post" action="" class="centered" accept-charset="utf-8">
+                        {{ getCsrfInput() }}
+                        <input type="hidden" name="action" value="event-helper/attendees/downloadpast">
+                        <input type="submit" class="btn submit js-btn-export" value="{{ 'Export'|t }}">
+                        <div class="spinner js-export-spinner hidden"></div>
+                    </form>
+
+                </div><!-- Body -->
+            </div><!-- Widget -->
+        </div><!-- Item -->
+        <div class="item" data-colspan="1">
+            <div class="widget pane">
+                <h2>Upcoming events</h2>
+                <div class="body">
+                    <div class="events-container">
+                        {% if events %}
+                        <table id="test" class="data fullwidth">
+                            <thead>
+                                <th>Name</th>
+                                <th class="thin">RSVPed</th>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                <tr>
+                                    <td><a href="/admin/entries/events/{{ event.id }}">{{ event.title }}</a></td>
+                                    <td class="thin">{{ event.attendance }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p>It looks like there are no upcoming events.</p>
+                        {% endif %}
+                    </div><!-- Attendees Container -->
+                </div><!-- Body -->
+            </div><!-- Widget -->
+        </div><!-- Item -->
+    </div><!-- Grid -->
+{% endblock %}

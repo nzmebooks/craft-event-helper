@@ -1,0 +1,20 @@
+{% extends parentLayout | default('_layouts/cp') %}
+
+{% do view.registerAssetBundle('nzmebooks\\eventhelper\\bundles\\EventHelperBundle') %}
+
+{% if noTabs is not defined %}
+    {% set tabs = {
+        home: { label: 'Home' | t, url: url('event-helper/') },
+        settings: { label: 'Settings' | t, url: url('event-helper/settings') },
+    } %}
+{% endif %}
+
+{% if title is not defined %}
+    {% set title = 'Event Helper' ~ ': ' ~ tabs[selectedTab].label %}
+{% endif %}
+
+{% set content %}
+    {% block blockContent %}
+
+    {% endblock %}
+{% endset %}
