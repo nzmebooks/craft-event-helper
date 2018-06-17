@@ -1,0 +1,46 @@
+{
+    "name": "nzmebooks/craft-event-helper",
+    "description": "Event Helper is a simple Craft CMS plugin that gives you the ability to track event attendance.",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "event-helper"
+    ],
+    "support": {
+        "docs": "https://github.com/nzmebooks/craft-event-helper/blob/master/README.md",
+        "issues": "https://github.com/nzmebooks/craft-event-helper/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "meBooks",
+            "homepage": "https://mebooks.co.nz"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1",
+        "plainlanguage/craft-plain-ics": "dev-craft3"
+    },
+    "autoload": {
+        "psr-4": {
+          "nzmebooks\\eventhelper\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Event Helper",
+        "handle": "event-helper",
+        "hasCpSettings": true,
+        "hasCpSection": true,
+        "changelogUrl": "https://raw.githubusercontent.com/nzmebooks/craft-event-helper/master/CHANGELOG.md",
+        "components": {
+            "eventHelperService": "nzmebooks\\eventhelper\\services\\EventHelperService",
+            "attendee": "nzmebooks\\eventhelper\\services\\AttendeeService",
+            "event": "nzmebooks\\eventhelper\\services\\EventService"
+        },
+        "class": "nzmebooks\\eventhelper\\EventHelper"
+    }
+}
