@@ -23,6 +23,8 @@ use craft\db\Query;
 use DateTimeZone;
 
 /**
+ * Class Attendees
+ *
  * @author    meBooks
  * @package   EventHelper
  * @since     1.0.0
@@ -34,6 +36,7 @@ class Attendees extends Component
 
     /**
      * Gets all attendees for all upcoming events from the database.
+     *
      * This is only useful in the CP, where you might want to view all attendees
      * across all of your events.
      * Return a multidimensional array that's available in the CP.
@@ -66,8 +69,9 @@ class Attendees extends Component
         return $data;
     }
 
-      /**
+    /**
      * Gets all attendees for all upcoming events from the database, for use in a CSV report.
+     *
      * This is only useful in the CP, where you might want to view all attendees
      * across all of your events.
      * Return a multidimensional array.
@@ -104,6 +108,7 @@ class Attendees extends Component
 
     /**
      * Gets all attendees for all past events from the database, for use in a CSV report.
+     *
      * This is only useful in the CP, where you might want to view all attendees
      * across all of your events.
      * Return a multidimensional array.
@@ -199,7 +204,7 @@ class Attendees extends Component
         // Change multiple linebreaks (i.e. empty lines) to <br />s
         $rsvpNotificationBodyTemplated = preg_replace("/([\r\n]){2,}/m", '<br /><br />', $rsvpNotificationBodyTemplated);
 
-        // template the email template
+        // Template the email template
         $emailTemplated = \Craft::$app->view->renderTemplate('email.html',
             array(
               'body' => $rsvpNotificationBodyTemplated,

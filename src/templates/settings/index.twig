@@ -15,28 +15,24 @@
         <input type="hidden" name="pluginHandle" value="event-helper">
 
         {% namespace 'settings' %}
+            {{ forms.lightswitchField({
+                id:           'sendRSVPNotifications',
+                name:         'sendRSVPNotifications',
+                label:        'Send RSVP notifications' |            t,
+                on:           settings.sendRSVPNotifications,
+                instructions: 'Send an email notification to the user when they RSVP to an event.' | t,
+                errors: settings.getErrors('sendRSVPNotifications'),
+            }) }}
 
-          {{ forms.lightswitchField({
-              id: 'sendRSVPNotifications',
-              name: 'sendRSVPNotifications',
-              label: 'Send RSVP notifications' | t,
-              on: settings.sendRSVPNotifications,
-              instructions: 'Send an email notification to the user when they RSVP to an event.' | t,
-              errors: settings.getErrors('sendRSVPNotifications'),
-          }) }}
-
-          {{ forms.textareaField({
-              id:            'rsvpNotificationBody',
-              name:          'rsvpNotificationBody',
-              rows:          '14',
-              label:         'RSVP notification email message body' | t,
-              instructions:  'Enter the body of the email message body to be sent to the user when they RSVP for an event. Note that the placeholders must NOT be removed.' | t,
-              value:         settings.rsvpNotificationBody,
-              errors:        settings.getErrors('rsvpNotificationBody'),
-          }) }}
-
+            {{ forms.textareaField({
+                id:            'rsvpNotificationBody',
+                name:          'rsvpNotificationBody',
+                rows:          '14',
+                label:         'RSVP notification email message body' | t,
+                instructions:  'Enter the body of the email message body to be sent to the user when they RSVP for an event. Note that the placeholders must NOT be removed.' | t,
+                value:         settings.rsvpNotificationBody,
+                errors:        settings.getErrors('rsvpNotificationBody'),
+            }) }}
         {% endnamespace %}
-
     </form>
-
 {% endblock %}

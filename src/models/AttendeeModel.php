@@ -16,6 +16,8 @@ use Craft;
 use craft\base\Model;
 
 /**
+ * Class AttendeeModel
+ *
  * @author    meBooks
  * @package   Eventhelper
  * @since     1.0.0

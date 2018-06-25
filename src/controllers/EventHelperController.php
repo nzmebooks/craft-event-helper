@@ -16,6 +16,8 @@ use Craft;
 use craft\web\Controller;
 
 /**
+ * Class EventHelperController
+ *
  * @author    meBooks
  * @package   EventHelper
  * @since     1.0.0
@@ -37,6 +39,8 @@ class EventHelperController extends Controller
     // =========================================================================
 
     /**
+     *  Our index action
+     *
      * @return mixed
      */
     public function actionIndex()
@@ -52,6 +56,8 @@ class EventHelperController extends Controller
     }
 
     /**
+     * Our settings action
+     *
      * @return mixed
      */
     public function actionSettings()

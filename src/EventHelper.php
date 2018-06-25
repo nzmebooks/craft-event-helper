@@ -76,11 +76,16 @@ class EventHelper extends Plugin
             'events' => Events::class,
         ]);
 
-        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
-            $event->rules['event-helper'] = 'event-helper/event-helper';
-            $event->rules['event-helper/settings'] = 'event-helper/event-helper/settings';
-            $event->rules['event-helper/attendees/downloadupcoming'] = 'event-helper/attendees/downloadupcoming';
-        });
+        // Register our control panel rules
+        Event::on(
+            UrlManager::class,
+            UrlManager::EVENT_REGISTER_CP_URL_RULES,
+            function(RegisterUrlRulesEvent $event) {
+                $event->rules['event-helper'] = 'event-helper/event-helper';
+                $event->rules['event-helper/settings'] = 'event-helper/event-helper/settings';
+                $event->rules['event-helper/attendees/downloadupcoming'] = 'event-helper/attendees/downloadupcoming';
+            }
+        );
 
         // Register our variables
         Event::on(
@@ -93,6 +98,8 @@ class EventHelper extends Plugin
             }
         );
 
+        // TODO: figure out why we can't get our site rules to work
+        // Register our site rules
         // Event::on(
         //     UrlManager::class,
         //     UrlManager::EVENT_REGISTER_SITE_URL_RULES,
@@ -100,38 +107,6 @@ class EventHelper extends Plugin
         //         $event->rules['POST event-helper/attendees/save-attendee'] = 'event-helper/attendees/save-attendee';
         //         $event->rules['POST event-helper/attendees/remove-attendee'] = 'event-helper/attendees/remove-attendee';
         //     }
-        // );
-
-        // $this->setComponents([
-        //     'eventHelperController' => EventHelperController::class,
-        //     'attendeeController' => AttendeeController::class,
-        // ]);
-
-        // Event::on(
-        //     UrlManager::class,
-        //     UrlManager::EVENT_REGISTER_CP_URL_RULES,
-        //     function (RegisterUrlRulesEvent $event) {
-        //         $event->rules['cpActionTrigger1'] = 'event-helper/default/do-something';
-        //         $event->rules['cpActionTrigger2'] = 'event-helper/attendee/do-something';
-        //     }
-        // );
-
-        // Event::on(
-        //     Plugins::class,
-        //     Plugins::EVENT_AFTER_INSTALL_PLUGIN,
-        //     function (PluginEvent $event) {
-        //         if ($event->plugin === $this) {
-        //         }
-        //     }
-        // );
-
-        // Craft::info(
-        //     Craft::t(
-        //         'event-helper',
-        //         '{name} plugin loaded',
-        //         ['name' => $this->name]
-        //     ),
-        //     __METHOD__
         // );
     }
 

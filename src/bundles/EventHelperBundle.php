@@ -1,23 +1,40 @@
 <?php
-namespace nzmebooks\eventhelper\bundles;
+
+/**
+ * event-helper plugin for Craft CMS 3.x
+ *
+ * Event Helper is a simple Craft CMS plugin that gives you the ability to track event attendance.
+ *
+ * @link      https://mebooks.co.nz
+ * @copyright Copyright (c) 2018 meBooks
+ */
+
+ namespace nzmebooks\eventhelper\bundles;
 
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;
 
+/**
+ * Class EventHelperBundle
+ *
+ * @author    meBooks
+ * @package   EventHelper
+ * @since     1.0.0
+ */
 class EventHelperBundle extends AssetBundle
 {
     public function init()
     {
-        // define the path that your publishable resources live
+        // Define the path that your publishable resources live
         $this->sourcePath = '@nzmebooks/eventhelper/resources';
 
-        // define the dependencies
+        // Define the dependencies
         $this->depends = [
             CpAsset::class,
         ];
 
-        // define the relative path to CSS/JS files that should be registered with the page
-        // when this asset bundle is registered
+        // Define the relative path to CSS/JS files that should be registered
+        // with the page when this asset bundle is registered
         $this->js = [
             'js/event-helper.js',
         ];

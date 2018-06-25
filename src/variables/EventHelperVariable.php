@@ -1,11 +1,13 @@
 <?php
+
 /**
  * event-helper plugin for Craft CMS 3.x
  *
- * Event Helper is a simple Craft CMS plugin that gives you the ability to track event attendance.
+ * Event Helper is a simple Craft CMS plugin that gives you the ability
+ * to track event attendance.
  *
  * @link      https://mebooks.co.nz
- * @copyright Copyright (c) 2018 meBooks
+ * @copyright 2018 meBooks
  */
 
 namespace nzmebooks\eventhelper\variables;
@@ -15,8 +17,12 @@ use nzmebooks\eventhelper\EventHelper;
 use Craft;
 
 /**
+ * Class EventHelperVariable
+ *
+ * Template variables for the Event Helper plugin
+ *
  * @author    meBooks
- * @package   EventHelper
+ * @package   Eventhelper
  * @since     1.0.0
  */
 class EventHelperVariable
@@ -36,9 +42,14 @@ class EventHelperVariable
     }
 
     /**
-     * Returns a boolean indicating whether a supplied event is attended by a supplied user.
+     * Returns a boolean indicating whether a supplied event is attended
+     * by a supplied user.
      *
      * @method isAttended
+     *
+     * @param int $eventId
+     * @param int $userId
+     *
      * @return Boolean
      */
     public function isAttended($eventId, $userId)
@@ -60,13 +71,19 @@ class EventHelperVariable
     }
 
     /**
+     * Return an array of events for a given category title
+     *
      * @param string $categoryTitle
-     * @param integer $limit
+     * @param int    $limit
+     *
      * @return array
      */
     public function getEventsByCategory($categoryTitle, $limit)
     {
-        $query = EventHelper::$plugin->events->getEventsByCategory($categoryTitle, $limit);
+        $query = EventHelper::$plugin->events->getEventsByCategory(
+            $categoryTitle,
+            $limit
+        );
 
         foreach ($query as &$row) {
             foreach ($row as $key => &$value) {
@@ -77,6 +94,12 @@ class EventHelperVariable
         return $query;
     }
 
+    /**
+     * Returns an .ics ical string
+     *
+     * @param Entry $event
+     * @return string ical
+     */
     public function renderIcs($event)
     {
         return EventHelper::$plugin->events->renderIcs($event);

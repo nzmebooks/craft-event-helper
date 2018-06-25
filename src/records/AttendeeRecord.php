@@ -16,6 +16,8 @@ use Craft;
 use craft\db\ActiveRecord;
 
 /**
+ * Class AttendeeRecord
+ *
  * @author    meBooks
  * @package   Eventhelper
  * @since     1.0.0

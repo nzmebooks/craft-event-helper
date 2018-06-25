@@ -19,6 +19,8 @@ use craft\helpers\DateTimeHelper;
 use yii\web\Cookie;
 
 /**
+ * Class AttendeesController
+ *
  * @author    meBooks
  * @package   EventHelper
  * @since     1.0.0
@@ -64,9 +66,6 @@ class AttendeesController extends Controller
 
         $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
 
-        // You need to declare a rules() method in your model for the
-        // validate method to work.
-
         if (!$attendee->validate()) {
             $message = $eventsGlobals->rsvpFailure
                 ? $eventsGlobals->rsvpFailure
@@ -108,8 +107,8 @@ class AttendeesController extends Controller
     }
 
     /**
-     * Delete an attendee from an event. This
-     * method also santizes user input as much as reasonably possible.
+     * Delete an attendee from an event.
+     * This method also santizes user input as much as reasonably possible.
      *
      * @method actionRemoveAttendee
      * @return void

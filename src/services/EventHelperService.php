@@ -18,6 +18,8 @@ use craft\helpers\App;
 use craft\helpers\StringHelper;
 
 /**
+ * Class EventHelperService
+ *
  * @author    meBooks
  * @package   EventHelper
  * @since     1.0.0

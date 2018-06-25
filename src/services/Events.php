@@ -20,6 +20,8 @@ use craft\db\Query;
 use DateTimeZone;
 
 /**
+ * Class Events
+ *
  * @author    meBooks
  * @package   EventHelper
  * @since     1.0.0
@@ -84,7 +86,9 @@ class Events extends Component
         }
     }
 
-    /*
+    /**
+     * Get all events
+     *
      * @return mixed
      */
     public function getEvents()
@@ -106,6 +110,13 @@ class Events extends Component
         return $query;
     }
 
+  /**
+   * Get all events by the supplied category
+   *
+   * @param string $categoryTitle
+   * @param int $limit
+   * @return mixed
+   */
     public function getEventsByCategory($categoryTitle, $limit)
     {
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();

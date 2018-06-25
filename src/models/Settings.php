@@ -1,7 +1,20 @@
 <?php
-namespace nzmebooks\eventhelper\models;
-use craft\base\Model;
+
 /**
+ * event-helper plugin for Craft CMS 3.x
+ *
+ * Event Helper is a simple Craft CMS plugin that gives you the ability to track event attendance.
+ *
+ * @link      https://mebooks.co.nz
+ * @copyright Copyright (c) 2018 meBooks
+ */
+
+ namespace nzmebooks\eventhelper\models;
+use craft\base\Model;
+
+/**
+ * Class Settings
+ *
  * @property boolean $enabled
  * @property boolean $sendRSVPNotifications
  * @property mixed   $rsvpNotificationBody
