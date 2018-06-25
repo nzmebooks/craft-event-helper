@@ -11,6 +11,7 @@
 namespace nzmebooks\eventhelper;
 
 use nzmebooks\eventhelper\controllers\AttendeesController;
+use nzmebooks\eventhelper\variables\EventHelperVariable;
 use nzmebooks\eventhelper\services\EventHelperService;
 use nzmebooks\eventhelper\services\Attendees;
 use nzmebooks\eventhelper\services\Events;
@@ -81,6 +82,26 @@ class EventHelper extends Plugin
             $event->rules['event-helper/attendees/downloadupcoming'] = 'event-helper/attendees/downloadupcoming';
         });
 
+        // Register our variables
+        Event::on(
+            CraftVariable::class,
+            CraftVariable::EVENT_INIT,
+            function (Event $event) {
+                /** @var CraftVariable $variable */
+                $variable = $event->sender;
+                $variable->set('eventHelper', EventHelperVariable::class);
+            }
+        );
+
+        // Event::on(
+        //     UrlManager::class,
+        //     UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+        //     function (RegisterUrlRulesEvent $event) {
+        //         $event->rules['POST event-helper/attendees/save-attendee'] = 'event-helper/attendees/save-attendee';
+        //         $event->rules['POST event-helper/attendees/remove-attendee'] = 'event-helper/attendees/remove-attendee';
+        //     }
+        // );
+
         // $this->setComponents([
         //     'eventHelperController' => EventHelperController::class,
         //     'attendeeController' => AttendeeController::class,
@@ -88,29 +109,10 @@ class EventHelper extends Plugin
 
         // Event::on(
         //     UrlManager::class,
-        //     UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-        //     function (RegisterUrlRulesEvent $event) {
-        //         $event->rules['siteActionTrigger1'] = 'event-helper/default';
-        //         $event->rules['siteActionTrigger2'] = 'event-helper/attendee';
-        //     }
-        // );
-
-        // Event::on(
-        //     UrlManager::class,
         //     UrlManager::EVENT_REGISTER_CP_URL_RULES,
         //     function (RegisterUrlRulesEvent $event) {
         //         $event->rules['cpActionTrigger1'] = 'event-helper/default/do-something';
         //         $event->rules['cpActionTrigger2'] = 'event-helper/attendee/do-something';
-        //     }
-        // );
-
-        // Event::on(
-        //     CraftVariable::class,
-        //     CraftVariable::EVENT_INIT,
-        //     function (Event $event) {
-        //         /** @var CraftVariable $variable */
-        //         $variable = $event->sender;
-        //         $variable->set('event-helper', EventHelperVariable::class);
         //     }
         // );
 

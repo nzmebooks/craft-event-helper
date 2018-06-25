@@ -20,7 +20,7 @@ use craft\db\ActiveRecord;
  * @package   Eventhelper
  * @since     1.0.0
  */
-class Attendee extends ActiveRecord
+class AttendeeRecord extends ActiveRecord
 {
     // Public Static Methods
     // =========================================================================
@@ -30,6 +30,6 @@ class Attendee extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%eventhelper_attendee}}';
+        return '{{%eventhelperattendees}}';
     }
 }

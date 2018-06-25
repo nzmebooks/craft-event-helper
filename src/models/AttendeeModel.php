@@ -20,15 +20,35 @@ use craft\base\Model;
  * @package   Eventhelper
  * @since     1.0.0
  */
-class Attendee extends Model
+class AttendeeModel extends Model
 {
     // Public Properties
     // =========================================================================
 
     /**
+     * @var int
+     */
+    public $userId;
+
+    /**
      * @var string
      */
-    public $someAttribute = 'Some Default';
+    public $name;
+
+    /**
+     * @var string
+     */
+    public $email;
+
+    /**
+     * @var int
+     */
+    public $eventId;
+
+    /**
+     * @var int
+     */
+    public $seats;
 
     // Public Methods
     // =========================================================================
@@ -39,8 +59,11 @@ class Attendee extends Model
     public function rules()
     {
         return [
-            ['someAttribute', 'string'],
-            ['someAttribute', 'default', 'value' => 'Some Default'],
+            ['userId', 'required'],
+            ['name', 'required'],
+            ['email', 'required'],
+            ['eventId', 'required'],
+            ['seats', 'required'],
         ];
     }
 }

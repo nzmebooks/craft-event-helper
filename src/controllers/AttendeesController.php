@@ -11,7 +11,7 @@
 namespace nzmebooks\eventhelper\controllers;
 
 use nzmebooks\eventhelper\EventHelper;
-use nzmebooks\eventhelper\services\Attendees;
+use nzmebooks\eventhelper\models\AttendeeModel;
 
 use Craft;
 use craft\web\Controller;
@@ -48,60 +48,63 @@ class AttendeesController extends Controller
      *
      * TODO : return the model with errors. (Currently non-functional.)
      */
+
     public function actionSaveAttendee()
     {
-        return 'HERE';
-        // $this->requirePostRequest();
+        $this->requirePostRequest();
 
-        // foreach (craft()->request->getPost() as $key => $value) {
-        //     // Cleanse the data as much as possible
-        //     $encodedValue = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-        //     $encodedValue = htmlspecialchars($value, ENT_QUOTES);
-        //     $encodedValue = htmlentities($encodedValue);
+        $attendee = new AttendeeModel();
 
-        //     $data[substr($key, 9)] = $encodedValue;
-        // }
+        $attendee->userId = $this->getSanitisedBodyParam('userId');
+        $attendee->name = $this->getSanitisedBodyParam('name');
+        $attendee->email = $this->getSanitisedBodyParam('email');
+        $attendee->eventId = $this->getSanitisedBodyParam('eventId');
+        $attendee->seats = $this->getSanitisedBodyParam('seats');
+        $redirect = $this->getSanitisedBodyParam('redirect');
 
-        // $attendee = new EventHelper_AttendeeModel();
-        // $attendee->userId = $data['userId'];
-        // $attendee->name = $data['name'];
-        // $attendee->email = $data['email'];
-        // $attendee->eventId = $data['eventId'];
-        // $attendee->seats = $data['seats'];
+        $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
 
-        // $eventsGlobals = craft()->globals->getSetByHandle('events');
-        // // You need to declare a rules() method in your model for the
-        // // validate method to work.
-        // if ($attendee->validate()) {
-        //     $settings = craft()->plugins->getPlugin('eventhelper')->getSettings();
+        // You need to declare a rules() method in your model for the
+        // validate method to work.
 
-        //     if ($settings->sendRSVPNotifications) {
-        //         craft()->eventHelper_attendees->SendRSVPNotifications($attendee);
-        //     }
+        if (!$attendee->validate()) {
+            $message = $eventsGlobals->rsvpFailure
+                ? $eventsGlobals->rsvpFailure
+                : 'Something wasn\'t right about your reservation. Try submitting it again.';
 
-        //     craft()->eventHelper_attendees->SaveAttendee($attendee);
+            Craft::$app->getSession()->setError($message);
 
-        //     $notice = $eventsGlobals->rsvpSuccess ? $eventsGlobals->rsvpSuccess : 'Thanks for your RSVP!';
+            Craft::$app->getUrlManager()->setRouteVariables([
+                'attendee' => $attendee
+            ]);
 
-        //     craft()->userSession->setNotice("$notice<br /><br /><a href='/events/ical/{$data['eventId']}'>Add this event to your calendar.</a>");
+            if ($redirect) {
+                return $this->redirect($redirect);
+            } else {
+                return $this->redirectToPostedUrl();
+            }
+        }
 
-        //     if ($data['redirect']) {
-        //         craft()->request->redirect($data['redirect']);
-        //     } else {
-        //         $this->redirectToPostedUrl();
-        //     }
-        // }
+        $settings = EventHelper::$plugin->getSettings();
 
-        // craft()->userSession->setError($eventsGlobals->rsvpFailure ? $eventsGlobals->rsvpFailure : 'Something wasn\'t right about your reservation. Try submitting it again.');
-        // craft()->urlManager->setRouteVariables(array(
-        //     'attendee' => $attendee
-        // ));
+        if ($settings->sendRSVPNotifications) {
+            EventHelper::$plugin->attendees->SendRSVPNotifications($attendee);
+        }
 
-        // if ($data['redirect']) {
-        //     craft()->request->redirect($data['redirect']);
-        // } else {
-        //     $this->redirectToPostedUrl();
-        // }
+        EventHelper::$plugin->attendees->SaveAttendee($attendee);
+
+        $notice = $eventsGlobals->rsvpSuccess
+          ? $eventsGlobals->rsvpSuccess
+          : 'Thanks for your RSVP!';
+
+        $message = "$notice<br /><br /><a href='/events/ical/{$attendee->eventId}'>Add this event to your calendar.</a>";
+        Craft::$app->getSession()->setNotice($message);
+
+        if ($redirect) {
+            return $this->redirect($redirect);
+        } else {
+            return $this->redirectToPostedUrl();
+        }
     }
 
     /**
@@ -110,47 +113,44 @@ class AttendeesController extends Controller
      *
      * @method actionRemoveAttendee
      * @return void
-     *
-     * TODO : return the model with errors. (Currently non-functional.)
      */
     public function actionRemoveAttendee()
     {
         $this->requirePostRequest();
 
-        foreach (craft()->request->getPost() as $key => $value) {
-            // Cleanse the data as much as possible
-            $encodedValue = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-            $encodedValue = htmlspecialchars($value, ENT_QUOTES);
-            $encodedValue = htmlentities($encodedValue);
+        $attendee = new AttendeeModel();
+        $attendee->eventId = $this->getSanitisedBodyParam('eventId');
+        $attendee->userId = $this->getSanitisedBodyParam('userId');
+        $redirect = $this->getSanitisedBodyParam('redirect');
 
-            $data[substr($key, 9)] = $encodedValue;
-        }
+        $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
 
-        $attendee = new EventHelper_AttendeeModel();
-        $attendee->userId = $data['userId'];
-        $attendee->eventId = $data['eventId'];
+        if (!EventHelper::$plugin->attendees->RemoveAttendee($attendee)) {
+            $message = $eventsGlobals->rsvpRemovalFailure
+                ? $eventsGlobals->rsvpRemovalFailure
+                : 'Something wasn\'t right about your removal request. Try submitting it again.';
 
-        $eventsGlobals = craft()->globals->getSetByHandle('events');
+            Craft::$app->getSession()->setError($message);
+            Craft::$app->getUrlManager()->setRouteVariables([
+                'attendee' => $attendee
+            ]);
 
-        if (craft()->eventHelper_attendees->RemoveAttendee($attendee)) {
-            craft()->userSession->setNotice($eventsGlobals->rsvpRemovalSuccess ? $eventsGlobals->rsvpRemovalSuccess : 'Your reservation has been removed for this event.<br />We hope to see you at future events.');
-
-            if ($data['redirect']) {
-                craft()->request->redirect($data['redirect']);
+            if ($redirect) {
+                return $this->redirect($redirect);
             } else {
-                $this->redirectToPostedUrl();
+                return $this->redirectToPostedUrl();
             }
         }
 
-        craft()->userSession->setError($eventsGlobals->rsvpRemovalFailure ? $eventsGlobals->rsvpRemovalFailure : 'Something wasn\'t right about your removal request. Try submitting it again.');
-        craft()->urlManager->setRouteVariables(array(
-            'attendee' => $attendee
-        ));
+        $message = $eventsGlobals->rsvpRemovalSuccess
+            ? $eventsGlobals->rsvpRemovalSuccess
+            : 'Your reservation has been removed for this event.<br />We hope to see you at future events.';
+        Craft::$app->getSession()->setNotice($message);
 
-        if ($data['redirect']) {
-            craft()->request->redirect($data['redirect']);
+        if ($redirect) {
+            return $this->redirect($redirect);
         } else {
-            $this->redirectToPostedUrl();
+            return $this->redirectToPostedUrl();
         }
     }
 
@@ -211,4 +211,24 @@ class AttendeesController extends Controller
           'mimeType' => 'text/csv'
         ));
     }
+
+    // Private Methods
+    // =========================================================================
+
+    /**
+     * Return a POST request param
+     *
+     * @method getSanitisedBodyParam
+     * @return string
+     */
+    private function getSanitisedBodyParam($name)
+    {
+        $value = Craft::$app->getRequest()->getBodyParam($name);
+        $valueEncoded = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+        $valueEncoded = htmlspecialchars($value, ENT_QUOTES);
+        $valueEncoded = htmlentities($valueEncoded);
+
+        return $valueEncoded;
+    }
+
 }

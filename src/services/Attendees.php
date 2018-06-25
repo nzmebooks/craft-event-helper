@@ -11,10 +11,14 @@
 namespace nzmebooks\eventhelper\services;
 
 use nzmebooks\eventhelper\EventHelper;
+use nzmebooks\eventhelper\records\AttendeeRecord;
 
 use Craft;
 use craft\base\Component;
 use craft\helpers\DateTimeHelper;
+use craft\elements\Entry;
+use craft\web\View;
+use craft\mail\Message;
 use craft\db\Query;
 use DateTimeZone;
 
@@ -132,5 +136,143 @@ class Attendees extends Component
         $data = array_merge([['Name', 'Email', 'RSVP Date', 'Event Start', 'Event']], $data);
 
         return $data;
+    }
+
+    /**
+     * Determines whether a given event is attended by a given user.
+     *
+     * @method isAttended
+     * @return Boolean
+     */
+    public function isAttended($eventId, $userId)
+    {
+        $query = (new Query())
+            ->select('eventhelperattendees.*, content.title')
+            ->from('eventhelperattendees')
+            ->leftJoin('entries AS entries', 'entries.id = eventhelperattendees.eventId')
+            ->join('JOIN', 'content AS content', 'content.elementId = entries.id')
+            ->where('eventhelperattendees.userId = ' . $userId)
+            ->andWhere('entries.id = ' . $eventId)
+            ->all();
+
+        return count($query) ? true : false;
+    }
+
+    /**
+     * Send notification email to an individual attendee.
+     *
+     * @method sendRSVPNotifications
+     * @param object $model An Attendee object.
+     * @return boolean
+     */
+    public function sendRSVPNotifications($attendee)
+    {
+        $settings = EventHelper::$plugin->getSettings();
+
+        // find the event
+        $event = Entry::find()
+          ->filterWhere(['entries.id' => $attendee->eventId])
+          ->one();
+
+        // determine the human-readable dates
+        if ($event->dateEnd) {
+            if ($event->dateEnd->format('Y-m-d') == $event->dateStart->format('Y-m-d')) {
+                $dates = $event->dateStart->format('l j F, Y, g:ia') . '-' . $event->dateEnd->format('g:ia');
+            } else {
+                $dates = $event->dateStart->format('l j F, Y, g:ia') . '-' . $event->dateEnd->format('l j F, Y, g:ia');
+            }
+        } else {
+            $dates = $event->dateStart->format('l j F, Y, g:ia');
+        }
+
+        // template the settings body template
+        $rsvpNotificationBodyTemplated = \Craft::$app->view->renderString(trim($settings->rsvpNotificationBody),
+            array(
+                'title' => $event->title,
+                'dates' => $dates,
+                'location' => $event->location,
+                'url' => $event->url,
+                'instructions' => $event->instructions,
+            )
+        );
+
+        // Change multiple linebreaks (i.e. empty lines) to <br />s
+        $rsvpNotificationBodyTemplated = preg_replace("/([\r\n]){2,}/m", '<br /><br />', $rsvpNotificationBodyTemplated);
+
+        // template the email template
+        $emailTemplated = \Craft::$app->view->renderTemplate('email.html',
+            array(
+              'body' => $rsvpNotificationBodyTemplated,
+            )
+        );
+
+        // construct and send the email
+        // TODO: consider abstracting email functionality to a separate class, as per
+        // https://github.com/vigetlabs/craft-disqusnotify/blob/master/src/services/Email.php
+        $email = new Message();
+        $emailSettings = Craft::$app->getSystemSettings()->getEmailSettings();
+
+        $email->setFrom([$emailSettings['fromEmail'] => $emailSettings['fromName']]);
+        $email->setTo($attendee->email);
+        $email->setSubject('China Capable Public Sector event: ' . $event->title);
+        $email->setHtmlBody($emailTemplated);
+
+        $tmpName = tempnam(sys_get_temp_dir(), 'cal.ics');
+        if ($tmpName) {
+            $tmpFile = fopen($tmpName, 'w');
+            $ics = EventHelper::$plugin->events->renderIcs($event, true);
+            fputs($tmpFile, $ics);
+            fclose($tmpFile);
+
+            $email->attach($tmpName, array(
+              'fileName' => 'cal.ics',
+              'contentType' => 'text/calendar',
+            ));
+        }
+
+        return Craft::$app->mailer->send($email);
+    }
+
+    /**
+     * Save an individual attendee to the Attendees table.
+     *
+     * @method saveAttendee
+     * @param object $model An Attendee object.
+     * @return boolean
+     */
+    public function saveAttendee($model)
+    {
+        $attributes = array(
+            'userId' => $model->userId,
+            'name' => $model->name,
+            'email' => $model->email,
+            'eventId' => $model->eventId,
+            'seats' => $model->seats,
+        );
+
+        $record = new AttendeeRecord();
+
+        foreach ($attributes as $key => $value) {
+            $record->setAttribute($key, $value);
+        }
+
+        return $record->save();
+    }
+
+    /**
+     * Remove an individual attendee from the Attendees table.
+     *
+     * @method removeAttendee
+     * @param object $model An Attendee object.
+     * @return integer
+     */
+    public function removeAttendee($model)
+    {
+        $record = new AttendeeRecord();
+
+        return $record->deleteAll([
+          'userId' => $model->userId,
+          'eventId' => $model->eventId,
+        ]);
     }
 }
