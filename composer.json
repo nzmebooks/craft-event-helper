@@ -36,11 +36,6 @@
         "hasCpSettings": true,
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/nzmebooks/craft-event-helper/master/CHANGELOG.md",
-        "components": {
-            "eventHelperService": "nzmebooks\\eventhelper\\services\\EventHelperService",
-            "attendee": "nzmebooks\\eventhelper\\services\\AttendeeService",
-            "event": "nzmebooks\\eventhelper\\services\\EventService"
-        },
         "class": "nzmebooks\\eventhelper\\EventHelper"
     }
 }

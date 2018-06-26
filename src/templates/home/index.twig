@@ -5,7 +5,13 @@
 {% set selectedTab = tab %}
 {% set fullPageForm = true %}
 
+{% set attendees = craft.eventHelper.getAttendees %}
+{% set events = craft.eventHelper.getEvents %}
+
 {% block blockContent %}
+
+    {% block actionButton %}{% endblock %}
+
     <div class="grid">
         <div class="item" data-colspan="2">
             <div class="widget pane">
@@ -42,7 +48,7 @@
 
                     <form method="post" action="" class="centered" accept-charset="utf-8">
                         {{ getCsrfInput() }}
-                        <input type="hidden" name="action" value="event-helper/attendees/downloadupcoming">
+                        <input type="hidden" name="action" value="event-helper/attendees/download-upcoming">
                         <input type="submit" class="btn submit js-btn-export" value="{{ 'Export'|t }}">
                         <div class="spinner js-export-spinner hidden"></div>
                     </form>
@@ -54,7 +60,7 @@
                 <div class="body">
                     <form method="post" action="" class="centered" accept-charset="utf-8">
                         {{ getCsrfInput() }}
-                        <input type="hidden" name="action" value="event-helper/attendees/downloadpast">
+                        <input type="hidden" name="action" value="event-helper/attendees/download-past">
                         <input type="submit" class="btn submit js-btn-export" value="{{ 'Export'|t }}">
                         <div class="spinner js-export-spinner hidden"></div>
                     </form>

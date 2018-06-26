@@ -27,17 +27,6 @@ use yii\web\Cookie;
  */
 class AttendeesController extends Controller
 {
-
-    // Protected Properties
-    // =========================================================================
-
-    /**
-     * @var    bool|array Allows anonymous access to this controller's actions.
-     *         The actions must be in 'kebab-case'
-     * @access protected
-     */
-    protected $allowAnonymous = ['save-attendee', 'remove-attendee'];
-
     // Public Methods
     // =========================================================================
 
@@ -158,7 +147,7 @@ class AttendeesController extends Controller
      *
      * @return string CSV
      */
-    public function actionDownloadupcoming()
+    public function actionDownloadUpcoming()
     {
         // Get data
         $results = EventHelper::$plugin->attendees->getUpcomingAttendeesForCsv();
@@ -187,7 +176,7 @@ class AttendeesController extends Controller
      *
      * @return string CSV
      */
-    public function actionDownloadpast()
+    public function actionDownloadPast()
     {
         // Get data
         $results = EventHelper::$plugin->attendees->getPastAttendeesForCsv();

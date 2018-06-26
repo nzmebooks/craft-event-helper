@@ -83,7 +83,6 @@ class EventHelper extends Plugin
             function(RegisterUrlRulesEvent $event) {
                 $event->rules['event-helper'] = 'event-helper/event-helper';
                 $event->rules['event-helper/settings'] = 'event-helper/event-helper/settings';
-                $event->rules['event-helper/attendees/downloadupcoming'] = 'event-helper/attendees/downloadupcoming';
             }
         );
 
@@ -97,17 +96,6 @@ class EventHelper extends Plugin
                 $variable->set('eventHelper', EventHelperVariable::class);
             }
         );
-
-        // TODO: figure out why we can't get our site rules to work
-        // Register our site rules
-        // Event::on(
-        //     UrlManager::class,
-        //     UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-        //     function (RegisterUrlRulesEvent $event) {
-        //         $event->rules['POST event-helper/attendees/save-attendee'] = 'event-helper/attendees/save-attendee';
-        //         $event->rules['POST event-helper/attendees/remove-attendee'] = 'event-helper/attendees/remove-attendee';
-        //     }
-        // );
     }
 
     // Protected Methods
