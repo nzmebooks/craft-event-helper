@@ -62,7 +62,7 @@ class AttendeesController extends Controller
 
             Craft::$app->getSession()->setError($message);
 
-            Craft::$app->getUrlManager()->setRouteVariables([
+            Craft::$app->getUrlManager()->setRouteParams([
                 'attendee' => $attendee
             ]);
 
@@ -119,7 +119,7 @@ class AttendeesController extends Controller
                 : 'Something wasn\'t right about your removal request. Try submitting it again.';
 
             Craft::$app->getSession()->setError($message);
-            Craft::$app->getUrlManager()->setRouteVariables([
+            Craft::$app->getUrlManager()->setRouteParams([
                 'attendee' => $attendee
             ]);
 
