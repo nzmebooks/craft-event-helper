@@ -81,8 +81,8 @@ class EventHelper extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function(RegisterUrlRulesEvent $event) {
-                $event->rules['event-helper'] = 'event-helper/event-helper';
-                $event->rules['event-helper/settings'] = 'event-helper/event-helper/settings';
+                $event->rules['event-helper'] = 'event-helper/default';
+                $event->rules['event-helper/settings'] = 'event-helper/default/settings';
             }
         );
 
@@ -98,6 +98,17 @@ class EventHelper extends Plugin
         );
     }
 
+    /**
+     * Returns the user-facing name of the plugin, which can override the name
+     * in composer.json
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return Craft::t('event-helper', 'Event Helper');
+    }
+
     // Protected Methods
     // =========================================================================
 
@@ -107,15 +118,5 @@ class EventHelper extends Plugin
     protected function createSettingsModel(): Settings
     {
         return new Settings();
-    }
-
-    /**
-     * @return string
-     * @throws \Twig_Error_Loader
-     * @throws \yii\base\Exception
-     */
-    protected function settingsHtml(): string
-    {
-        return Craft::$app->view->renderTemplate('event-helper/settings');
     }
 }

@@ -10,7 +10,7 @@
 {% endif %}
 
 {% if title is not defined %}
-    {% set title = craft.eventhelper.getPluginName ~ ': ' ~ tabs[selectedTab].label %}
+    {% set title = craft.eventHelper.getPluginName ~ ': ' ~ tabs[selectedTab].label %}
 {% endif %}
 
 {% set content %}

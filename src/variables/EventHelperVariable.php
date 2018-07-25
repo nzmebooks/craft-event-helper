@@ -30,6 +30,13 @@ class EventHelperVariable
     // Public Methods
     // =========================================================================
 
+    public function getPluginName()
+    {
+        $pluginName = EventHelper::$plugin->getName();
+
+        return $pluginName;
+    }
+
     /**
      * Returns an array of attendees
      *
