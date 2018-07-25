@@ -7,8 +7,6 @@
 {% set fullPageForm = true %}
 
 {% block blockContent %}
-    <p>Settings page content goes here</p>
-
     <form method="POST" accept-charset="UTF-8">
         {{ csrfInput() }}
         <input type="hidden" name="action" value="plugins/save-plugin-settings">
