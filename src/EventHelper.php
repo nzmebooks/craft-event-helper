@@ -10,12 +10,10 @@
 
 namespace nzmebooks\eventhelper;
 
-use nzmebooks\eventhelper\controllers\AttendeesController;
 use nzmebooks\eventhelper\variables\EventHelperVariable;
 use nzmebooks\eventhelper\services\EventHelperService;
 use nzmebooks\eventhelper\services\Attendees;
 use nzmebooks\eventhelper\services\Events;
-// use nzmebooks\eventhelper\variables\EventHelperVariable;
 use nzmebooks\eventhelper\models\Settings;
 
 use Craft;
@@ -119,4 +117,15 @@ class EventHelper extends Plugin
     {
         return new Settings();
     }
+
+    /**
+     * @inheritdoc
+     */
+    // protected function settingsHtml(): string
+    // {
+    //   return Craft::$app->view->renderTemplate('event-helper/settings/index', [
+    //     'tab' => 'settings',
+    //     'settings' => $this->getSettings(),
+    //   ]);
+    // }
 }

@@ -19,7 +19,7 @@
                 label:        'Send RSVP notifications' |            t,
                 on:           settings.sendRSVPNotifications,
                 instructions: 'Send an email notification to the user when they RSVP to an event.' | t,
-                errors: settings.getErrors('sendRSVPNotifications'),
+                errors:       settings.getErrors('sendRSVPNotifications'),
             }) }}
 
             {{ forms.textareaField({

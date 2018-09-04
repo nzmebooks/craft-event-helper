@@ -33,7 +33,7 @@
     "extra": {
         "name": "Event Helper",
         "handle": "event-helper",
-        "hasCpSettings": true,
+        "hasCpSettings": false,
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/nzmebooks/craft-event-helper/master/CHANGELOG.md",
         "class": "nzmebooks\\eventhelper\\EventHelper"
