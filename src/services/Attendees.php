@@ -1,4 +1,5 @@
 <?php
+
 /**
  * event-helper plugin for Craft CMS 3.x
  *
@@ -176,8 +177,10 @@ class Attendees extends Component
 
         // find the event
         $event = Entry::find()
-          ->filterWhere(['entries.id' => $attendee->eventId])
-          ->one();
+            ->filterWhere(['entries.id' => $attendee->eventId])
+            ->one();
+
+        $eventTitle = $event->longTitle ?? $event->title;
 
         // determine the human-readable dates
         if ($event->dateEnd) {
@@ -191,9 +194,10 @@ class Attendees extends Component
         }
 
         // template the settings body template
-        $rsvpNotificationBodyTemplated = \Craft::$app->view->renderString(trim($settings->rsvpNotificationBody),
+        $rsvpNotificationBodyTemplated = \Craft::$app->view->renderString(
+            trim($settings->rsvpNotificationBody),
             array(
-                'title' => $event->title,
+                'title' => $eventTitle,
                 'dates' => $dates,
                 'location' => $event->location,
                 'url' => $event->url,
@@ -205,9 +209,10 @@ class Attendees extends Component
         $rsvpNotificationBodyTemplated = preg_replace("/([\r\n]){2,}/m", '<br /><br />', $rsvpNotificationBodyTemplated);
 
         // Template the email template
-        $emailTemplated = \Craft::$app->view->renderTemplate('email.html',
+        $emailTemplated = \Craft::$app->view->renderTemplate(
+            'email.html',
             array(
-              'body' => $rsvpNotificationBodyTemplated,
+                'body' => $rsvpNotificationBodyTemplated,
             )
         );
 
@@ -219,7 +224,7 @@ class Attendees extends Component
 
         $email->setFrom([$emailSettings['fromEmail'] => $emailSettings['fromName']]);
         $email->setTo($attendee->email);
-        $email->setSubject('China Capable Public Sector event: ' . $event->title);
+        $email->setSubject('China Capable Public Sector event: ' . $eventTitle);
         $email->setHtmlBody($emailTemplated);
 
         $tmpName = tempnam(sys_get_temp_dir(), 'cal.ics');
@@ -230,8 +235,8 @@ class Attendees extends Component
             fclose($tmpFile);
 
             $email->attach($tmpName, array(
-              'fileName' => 'cal.ics',
-              'contentType' => 'text/calendar',
+                'fileName' => 'cal.ics',
+                'contentType' => 'text/calendar',
             ));
         }
 
@@ -276,8 +281,8 @@ class Attendees extends Component
         $record = new AttendeeRecord();
 
         return $record->deleteAll([
-          'userId' => $model->userId,
-          'eventId' => $model->eventId,
+            'userId' => $model->userId,
+            'eventId' => $model->eventId,
         ]);
     }
 }
