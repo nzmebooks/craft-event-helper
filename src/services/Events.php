@@ -54,7 +54,7 @@ class Events extends Component
         }
 
         $params = array(
-            'title'           => $event->title,
+            'title'           => $event->longTitle ?? $event->title,
             'description'     => $description,
             'startDateTime'   => $event->dateStart->format('Y-m-d H:i:sP'),
             'endDateTime'     => $event->dateEnd->format('Y-m-d H:i:sP'),
