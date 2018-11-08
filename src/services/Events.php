@@ -63,6 +63,8 @@ class Events extends Component
             'alarmAction'     => 'DISPLAY',
             'alarmDescription'=> 'Reminder',
             'alarmTrigger'    => '-PT30M',
+            'useTimezone'     => true,
+            'useUtc'          => false,
         );
 
         return $params;
