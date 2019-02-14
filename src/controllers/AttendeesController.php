@@ -213,8 +213,10 @@ class AttendeesController extends Controller
     {
         $value = Craft::$app->getRequest()->getBodyParam($name);
         $valueEncoded = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-        $valueEncoded = htmlspecialchars($value, ENT_QUOTES);
-        $valueEncoded = htmlentities($valueEncoded);
+
+        // Stop "Ella.O'Neill@mfat.govt.nz" ending up as "Ella.O&amp;#039;Neill@mfat.govt.nz";
+        // $valueEncoded = htmlspecialchars($value, ENT_QUOTES);
+        // $valueEncoded = htmlentities($valueEncoded);
 
         return $valueEncoded;
     }
