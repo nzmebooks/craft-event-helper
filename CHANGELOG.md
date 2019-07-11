@@ -7,3 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## 1.0.0 - 2018-06-16
 ### Added
 - Initial release
+
+## 1.1.3 - 2019-07-11
+### Changed
+- Ensure we treat redirect parameters as hashed (https://docs.craftcms.com/v3/changes-in-craft-3.html#request-params)

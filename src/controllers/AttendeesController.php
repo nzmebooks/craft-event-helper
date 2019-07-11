@@ -51,7 +51,6 @@ class AttendeesController extends Controller
         $attendee->email = $this->getSanitisedBodyParam('email');
         $attendee->eventId = $this->getSanitisedBodyParam('eventId');
         $attendee->seats = $this->getSanitisedBodyParam('seats');
-        $redirect = $this->getSanitisedBodyParam('redirect');
 
         $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
 
@@ -66,11 +65,7 @@ class AttendeesController extends Controller
                 'attendee' => $attendee
             ]);
 
-            if ($redirect) {
-                return $this->redirect($redirect);
-            } else {
-                return $this->redirectToPostedUrl();
-            }
+            return $this->redirectToPostedUrl();
         }
 
         $settings = EventHelper::$plugin->getSettings();
@@ -88,11 +83,7 @@ class AttendeesController extends Controller
         $message = "$notice<br /><br /><a href='/events/ical/{$attendee->eventId}'>Add this event to your calendar.</a>";
         Craft::$app->getSession()->setNotice($message);
 
-        if ($redirect) {
-            return $this->redirect($redirect);
-        } else {
-            return $this->redirectToPostedUrl();
-        }
+        return $this->redirectToPostedUrl();
     }
 
     /**
@@ -109,7 +100,6 @@ class AttendeesController extends Controller
         $attendee = new AttendeeModel();
         $attendee->eventId = $this->getSanitisedBodyParam('eventId');
         $attendee->userId = $this->getSanitisedBodyParam('userId');
-        $redirect = $this->getSanitisedBodyParam('redirect');
 
         $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
 
@@ -123,11 +113,7 @@ class AttendeesController extends Controller
                 'attendee' => $attendee
             ]);
 
-            if ($redirect) {
-                return $this->redirect($redirect);
-            } else {
-                return $this->redirectToPostedUrl();
-            }
+            return $this->redirectToPostedUrl();
         }
 
         $message = $eventsGlobals->rsvpRemovalSuccess
@@ -135,11 +121,7 @@ class AttendeesController extends Controller
             : 'Your reservation has been removed for this event.<br />We hope to see you at future events.';
         Craft::$app->getSession()->setNotice($message);
 
-        if ($redirect) {
-            return $this->redirect($redirect);
-        } else {
-            return $this->redirectToPostedUrl();
-        }
+        return $this->redirectToPostedUrl();
     }
 
     /**
