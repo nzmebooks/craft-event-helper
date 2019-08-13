@@ -151,6 +151,8 @@ class AttendeesController extends Controller
           'forceDownload' => true,
           'mimeType' => 'text/csv'
         ));
+
+        Craft::$app->end();
     }
 
     /**
@@ -180,6 +182,8 @@ class AttendeesController extends Controller
           'forceDownload' => true,
           'mimeType' => 'text/csv'
         ));
+
+        Craft::$app->end();
     }
 
     // Private Methods
