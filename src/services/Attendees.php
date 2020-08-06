@@ -209,8 +209,9 @@ class Attendees extends Component
         $rsvpNotificationBodyTemplated = preg_replace("/([\r\n]){2,}/m", '<br /><br />', $rsvpNotificationBodyTemplated);
 
         // Template the email template
+        $template = Craft::$app->getMailer()->template ?? 'email.twig';
         $emailTemplated = \Craft::$app->view->renderTemplate(
-            'email.html',
+            $template,
             array(
                 'body' => $rsvpNotificationBodyTemplated,
             )
