@@ -99,7 +99,7 @@ class Events extends Component
         $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
         $query = (new Query())
-            ->select('entries.id, content.title, content.field_dateStart, content.field_dateEnd, COUNT(attendee.seats) AS attendance')
+            ->select('entries.id, content.title, content.field_dateStart, content.field_dateEnd, content.field_eventCode, COUNT(attendee.seats) AS attendance')
             ->from('content')
             ->join('JOIN', 'entries AS entries', 'content.elementId = entries.id')
             ->join('JOIN', 'sections AS sections', 'entries.sectionId = sections.id')
