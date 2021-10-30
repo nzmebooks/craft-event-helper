@@ -47,7 +47,7 @@
                     </div><!-- Attendees Container -->
 
                     <form method="post" action="" class="centered" accept-charset="utf-8">
-                        {{ getCsrfInput() }}
+                        {{ csrfInput() }}
                         <input type="hidden" name="action" value="event-helper/attendees/download-upcoming">
                         <input type="submit" class="btn submit js-btn-export" value="{{ 'Export'|t }}">
                         <div class="spinner js-export-spinner hidden"></div>
@@ -59,7 +59,7 @@
                 <h2>RSVPs for past events</h2>
                 <div class="body">
                     <form method="post" action="" class="centered" accept-charset="utf-8">
-                        {{ getCsrfInput() }}
+                        {{ csrfInput() }}
                         <input type="hidden" name="action" value="event-helper/attendees/download-past">
                         <input type="submit" class="btn submit js-btn-export" value="{{ 'Export'|t }}">
                         <div class="spinner js-export-spinner hidden"></div>
