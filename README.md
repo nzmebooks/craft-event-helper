@@ -34,7 +34,7 @@ Here's the basic structure of an event form:
 {% if craft.session.isLoggedIn %}
     {% if craft.eventHelper.isAttended(entry.id, currentUser.id) %}
         <form method="post" action="" accept-charset="UTF-8">
-            {{ csrfInput() }}
+            {{ getCsrfInput() }}
             <input type="hidden" name="action" value="event-helper/attendees/remove-attendee">
             <input type="hidden" name="eventId" value="{{ entry.id }}">
             <input type="hidden" name="userId" value="{{ currentUser.id }}">
@@ -43,7 +43,7 @@ Here's the basic structure of an event form:
         </form>
     {% else %}
         <form method="post" action="" accept-charset="UTF-8">
-            {{ csrfInput() }}
+            {{ getCsrfInput() }}
             <input type="hidden" name="action" value="event-helper/attendees/save-attendee">
             <input type="hidden" name="eventId" value="{{ entry.id }}">
             <input type="hidden" name="userId" value="{{ currentUser.id }}">
