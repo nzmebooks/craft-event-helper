@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.1.9 - 2021-12-16
+### Fixed
+- Change getCsrfInput to csrfInput
+
 ## 1.1.8 - 2021-11-20
 ### Fixed
 - Remove cpTabs call and change csrfInput to getCsrfInput
