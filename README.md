@@ -8,8 +8,6 @@ Event Helper is a simple Craft CMS plugin, based on the [Mighty Events] plugin(h
 
 This plugin requires Craft CMS 3.0.0-beta.23 or later.
 
-Note that we assume that the [craft-plain-ics plugin](https://github.com/plainlanguage/craft-plain-ics) is installed.
-
 ## Installation
 
 To install the plugin, follow these instructions.

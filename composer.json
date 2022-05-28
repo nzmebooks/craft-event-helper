@@ -2,7 +2,7 @@
     "name": "nzmebooks/craft-event-helper",
     "description": "Event Helper is a simple Craft CMS plugin that gives you the ability to track event attendance.",
     "type": "craft-plugin",
-    "version": "1.1.9",
+    "version": "2.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -21,9 +21,16 @@
             "homepage": "https://mebooks.co.nz"
         }
     ],
+    "repositories": [
+        {
+        "type": "git",
+        "url": "https://github.com/nzmebooks/craft-plain-ics"
+        }
+    ],
     "require": {
-        "craftcms/cms": "^3.0.0-RC1",
-        "plainlanguage/craft-plain-ics": "dev-craft3"
+        "craftcms/cms": "^4.0.0-alpha.1",
+        "php": "^8.0.2",
+        "plainlanguage/craft-plain-ics": "dev-craft4"
     },
     "autoload": {
         "psr-4": {
@@ -37,5 +44,16 @@
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/nzmebooks/craft-event-helper/master/CHANGELOG.md",
         "class": "nzmebooks\\eventhelper\\EventHelper"
+    },
+    "config": {
+        "allow-plugins": {
+            "craftcms/plugin-installer": true,
+            "yiisoft/yii2-composer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "craftcms/rector": "dev-main"
     }
 }

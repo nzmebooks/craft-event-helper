@@ -58,7 +58,7 @@ class AttendeeModel extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             ['userId', 'required'],

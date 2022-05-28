@@ -53,7 +53,7 @@ class EventHelper extends Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '1.0.0';
+    public string $schemaVersion = '1.0.0';
 
     // Public Methods
     // =========================================================================
@@ -113,7 +113,7 @@ class EventHelper extends Plugin
     /**
      * @return Settings
      */
-    protected function createSettingsModel(): Settings
+    protected function createSettingsModel(): ?\craft\base\Model
     {
         return new Settings();
     }
