@@ -221,7 +221,7 @@ class Attendees extends Component
         // TODO: consider abstracting email functionality to a separate class, as per
         // https://github.com/vigetlabs/craft-disqusnotify/blob/master/src/services/Email.php
         $email = new Message();
-        $emailSettings = Craft::$app->getSystemSettings()->getEmailSettings();
+        $emailSettings = Craft::$app->getProjectConfig()->get('email');
 
         $email->setFrom([$emailSettings['fromEmail'] => $emailSettings['fromName']]);
         $email->setTo($attendee->email);
