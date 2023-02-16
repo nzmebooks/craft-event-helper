@@ -2,7 +2,7 @@
     "name": "nzmebooks/craft-event-helper",
     "description": "Event Helper is a simple Craft CMS plugin that gives you the ability to track event attendance.",
     "type": "craft-plugin",
-    "version": "2.2.1",
+    "version": "2.2.2",
     "keywords": [
         "craft",
         "cms",
@@ -28,7 +28,7 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^4.2.1",
+        "craftcms/cms": "~4.2.1",
         "php": "^8.0.2",
         "plainlanguage/craft-plain-ics": "dev-craft4"
     },
