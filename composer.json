@@ -28,9 +28,9 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^4.4",
-        "php": "^8.0.2",
-        "plainlanguage/craft-plain-ics": "dev-craft4"
+        "craftcms/cms": "^5.0.0-beta.1",
+        "php": "^8.2",
+        "plainlanguage/craft-plain-ics": "^3.0"
     },
     "autoload": {
         "psr-4": {
