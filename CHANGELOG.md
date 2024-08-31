@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.0.2 - 2024-09-01
+### Modified
+- Correct queries to work with elements_sites instead of content
+
 ## 3.0.1 - 2024-08-25
 ### Modified
 - composer.json needs to specify correct tag

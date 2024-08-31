@@ -48,19 +48,39 @@ class Attendees extends Component
     public function getAttendees()
     {
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
-        $dateNowUTC = $dateNowUTC->format('Y-m-d H:i:s');
+        $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
-        $query = (new Query())
-            ->select('eventhelperattendees.*, content.title')
+        $records = (new Query())
+            ->select('
+              eventhelperattendees.*,
+              elements_sites.title,
+              elements_sites.content
+            ')
             ->from('eventhelperattendees')
             ->leftJoin('entries AS entries', 'entries.id = eventhelperattendees.eventId')
-            ->join('JOIN', 'content AS content', 'content.elementId = entries.id')
-            ->where("content.field_dateStart > \"$dateNowUTC\"")
+            ->join('JOIN', 'elements_sites', 'elements_sites.elementId = entries.id')
             ->all();
+
+        // $builder = Craft::$app->getDb()->getQueryBuilder();
+        // die(var_dump($query->prepare($builder)->createCommand()->rawSql));
 
         $data = array();
 
-        foreach ($query as $row) {
+        foreach ($records as $index => $row) {
+            $content = json_decode($row['content'], true);
+            $keys = array_keys($content);
+
+            if (
+              ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
+            ) {
+              $startDate = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+            }
+
+            if ($startDate && $startDate < $dateNowUTCFormatted) {
+              unset($records[$index]);
+              continue;
+            }
+
             $row['dateCreated'] = date_format(date_create($row['dateCreated']), "M d, Y");
             $row['dateUpdated'] = date_format(date_create($row['dateUpdated']), "M d, Y");
 
@@ -83,21 +103,47 @@ class Attendees extends Component
     public function getUpcomingAttendeesForCsv()
     {
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
-        $dateNowUTC = $dateNowUTC->format('Y-m-d H:i:s');
+        $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
-        $query = (new Query())
-            ->select('eventhelperattendees.name, eventhelperattendees.email, eventhelperattendees.dateCreated, content.field_dateStart, content.title')
+        $records = (new Query())
+            ->select('
+              eventhelperattendees.name,
+              eventhelperattendees.email,
+              eventhelperattendees.dateCreated,
+              elements_sites.title AS field_dateStart,
+              elements_sites.title,
+              elements_sites.content
+            ')
             ->from('eventhelperattendees')
-            ->leftJoin('entries AS entries', 'entries.id = eventhelperattendees.eventId')
-            ->join('JOIN', 'content AS content', 'content.elementId = entries.id')
-            ->where("content.field_dateStart > \"$dateNowUTC\"")
-            ->orderBy('content.field_dateStart DESC')
+            ->leftJoin('entries', 'entries.id = eventhelperattendees.eventId')
+            ->join('JOIN', 'elements_sites', 'elements_sites.elementId = entries.id')
             ->all();
 
         $data = array();
 
-        foreach ($query as $row) {
-            $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d");
+        foreach ($records as $index => $row) {
+            $content = json_decode($row['content'], true);
+            $keys = array_keys($content);
+
+            if (
+              ($keys[0] ?? null) && ($content[$keys[0]]['date'] ?? null)
+            ) {
+              $row['field_dateStart'] = isset($content[$keys[0]]) && is_array($content[$keys[0]]) ? $content[$keys[0]]['date'] : null;
+            } else {
+              if (
+                ($keys[2] ?? null) && ($content[$keys[2]]['date'] ?? null)
+              ) {
+                $row['field_dateStart'] = isset($content[$keys[2]]) && is_array($content[$keys[2]]) ? $content[$keys[2]]['date'] : null;
+              }
+            }
+
+            if (($row['field_dateStart'] ?? null) && $row['field_dateStart'] < $dateNowUTCFormatted) {
+              unset($records[$index]);
+              continue;
+            }
+
+            $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d H:i:s");
+            unset($row['content']);
 
             $data[] = $row;
         }
@@ -120,21 +166,41 @@ class Attendees extends Component
     public function getPastAttendeesForCsv()
     {
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
-        $dateNowUTC = $dateNowUTC->format('Y-m-d H:i:s');
+        $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
-        $query = (new Query())
-            ->select('eventhelperattendees.name, eventhelperattendees.email, eventhelperattendees.dateCreated, content.field_dateStart, content.title')
+        $records = (new Query())
+            ->select('
+              eventhelperattendees.name,
+              eventhelperattendees.email,
+              eventhelperattendees.dateCreated,
+              elements_sites.title AS field_dateStart,
+              elements_sites.title,
+              elements_sites.content'
+            )
             ->from('eventhelperattendees')
-            ->leftJoin('entries AS entries', 'entries.id = eventhelperattendees.eventId')
-            ->join('JOIN', 'content AS content', 'content.elementId = entries.id')
-            ->where("content.field_dateStart < \"$dateNowUTC\"")
-            ->orderBy('content.field_dateStart DESC')
+            ->leftJoin('entries', 'entries.id = eventhelperattendees.eventId')
+            ->join('JOIN', 'elements_sites', 'elements_sites.elementId = entries.id')
             ->all();
 
         $data = array();
 
-        foreach ($query as $row) {
-            $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d");
+        foreach ($records as $index => $row) {
+            $content = json_decode($row['content'], true);
+            $keys = array_keys($content);
+
+            if (
+              ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
+            ) {
+              $row['field_dateStart'] = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+            }
+
+            if (($row['field_dateStart'] ?? null) && $row['field_dateStart'] > $dateNowUTCFormatted) {
+              unset($records[$index]);
+              continue;
+            }
+
+            $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d H:i:s");
+            unset($row['content']);
 
             $data[] = $row;
         }
@@ -153,10 +219,13 @@ class Attendees extends Component
     public function isAttended($eventId, $userId)
     {
         $query = (new Query())
-            ->select('eventhelperattendees.*, content.title')
+            ->select('
+              eventhelperattendees.*,
+              elements_sites.title
+            ')
             ->from('eventhelperattendees')
-            ->leftJoin('entries AS entries', 'entries.id = eventhelperattendees.eventId')
-            ->join('JOIN', 'content AS content', 'content.elementId = entries.id')
+            ->leftJoin('entries', 'entries.id = eventhelperattendees.eventId')
+            ->join('JOIN', 'elements_sites', 'elements_sites.elementId = entries.id')
             ->where('eventhelperattendees.userId = ' . $userId)
             ->andWhere('entries.id = ' . $eventId)
             ->all();

@@ -98,18 +98,41 @@ class Events extends Component
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
         $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
-        $query = (new Query())
-            ->select('entries.id, content.title, content.field_dateStart, content.field_dateEnd, content.field_eventCode, COUNT(attendee.seats) AS attendance')
-            ->from('content')
-            ->join('JOIN', 'entries AS entries', 'content.elementId = entries.id')
+        $records = (new Query())
+            ->select('
+                entries.id,
+                elements_sites.title,
+                elements_sites.content,
+                COUNT(attendee.seats) AS attendance'
+            )
+            ->from('elements_sites')
+            ->join('JOIN', 'entries AS entries', 'elements_sites.elementId = entries.id')
             ->join('JOIN', 'sections AS sections', 'entries.sectionId = sections.id')
             ->leftJoin('eventhelperattendees AS attendee', 'entries.id = attendee.eventId')
             ->where('sections.handle = "events"')
-            ->andWhere("content.field_dateStart > \"$dateNowUTCFormatted\"")
-            ->groupBy('content.title')
+            ->groupBy('elements_sites.title')
             ->all();
 
-        return $query;
+        // $builder = Craft::$app->getDb()->getQueryBuilder();
+        // die(var_dump($query->prepare($builder)->createCommand()->rawSql));
+
+        foreach ($records as $index => $record) {
+          $content = json_decode($record['content'], true);
+          $keys = array_keys($content);
+
+          if (
+            ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
+          ) {
+            $startDate = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+          }
+
+          if ($startDate && $startDate < $dateNowUTCFormatted) {
+            unset($records[$index]);
+            continue;
+          }
+        }
+
+        return $records;
     }
 
   /**
@@ -124,19 +147,44 @@ class Events extends Component
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
         $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
-        $query = (new Query())
-            ->select('entries.id, content.title, content.field_dateStart, content.field_dateEnd')
-            ->from('content')
-            ->join('JOIN', 'entries AS entries', 'content.elementId = entries.id')
+        $records = (new Query())
+            ->select('
+              entries.id,
+              elements_sites.title,
+              elements_sites.content'
+            )
+            ->from('elements_sites')
+            ->join('JOIN', 'entries AS entries', 'elements_sites.elementId = entries.id')
             ->join('JOIN','sections AS sections', 'entries.sectionId = sections.id')
             ->join('JOIN','relations AS relations', 'entries.id = relations.sourceId')
-            ->join('JOIN','content AS relatedContent', 'relatedContent.elementId = relations.targetId')
+            ->join('JOIN','elements_sites AS relatedContent', 'relatedContent.elementId = relations.targetId')
             ->where('sections.handle = "events"')
-            ->andWhere("content.field_dateStart > \"$dateNowUTCFormatted\"")
             ->andWhere("relatedContent.title = '$categoryTitle'")
             ->limit($limit)
             ->all();
 
-        return $query;
+        foreach ($records as $index => $record) {
+          $content = json_decode($record['content'], true);
+          $keys = array_keys($content);
+
+          if (
+            ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
+          ) {
+            $record['field_dateStart'] = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+          }
+
+          if (
+            ($keys[2] ?? null) && ($content[$keys[2]]['date'] ?? null)
+          ) {
+            $record['field_dateEnd'] = isset($content[$keys[2]]) && is_array($content[$keys[2]]) ? $content[$keys[2]]['date'] : null;
+          }
+
+          if (($record['field_dateStart'] ?? null) && $record['field_dateStart'] < $dateNowUTCFormatted) {
+            unset($records[$index]);
+            continue;
+          }
+        }
+
+        return $records;
     }
 }
