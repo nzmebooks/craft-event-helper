@@ -17,6 +17,7 @@ use Craft;
 use craft\web\Controller;
 use craft\helpers\DateTimeHelper;
 use yii\web\Cookie;
+use craft\elements\Entry;
 
 /**
  * Class AttendeesController
@@ -51,6 +52,7 @@ class AttendeesController extends Controller
         $attendee->email = $this->getSanitisedBodyParam('email');
         $attendee->eventId = $this->getSanitisedBodyParam('eventId');
         $attendee->seats = $this->getSanitisedBodyParam('seats');
+        $redirect = $this->getSanitisedBodyParam('redirect');
 
         $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
 
@@ -65,25 +67,41 @@ class AttendeesController extends Controller
                 'attendee' => $attendee
             ]);
 
-            return $this->redirectToPostedUrl();
+            return $redirect
+                ? $this->redirect($redirect)
+                : $this->redirectToPostedUrl();
         }
 
-        $settings = EventHelper::$plugin->getSettings();
+        // Check that the user hasn't already RSVP'd
+        $isAttended = EventHelper::$plugin->attendees->IsAttended($attendee->eventId, $attendee->userId);
 
-        if ($settings->sendRSVPNotifications) {
-            EventHelper::$plugin->attendees->SendRSVPNotifications($attendee);
+        if (!$isAttended) {
+            $settings = EventHelper::$plugin->getSettings();
+
+            if ($settings->sendRSVPNotifications) {
+                EventHelper::$plugin->attendees->SendRSVPNotifications($attendee);
+            }
+
+            EventHelper::$plugin->attendees->SaveAttendee($attendee);
         }
-
-        EventHelper::$plugin->attendees->SaveAttendee($attendee);
 
         $notice = $eventsGlobals->rsvpSuccess
-          ? $eventsGlobals->rsvpSuccess
-          : 'Thanks for your RSVP!';
+            ? $eventsGlobals->rsvpSuccess
+            : 'Thanks for your RSVP!';
 
+        $event = Entry::find()
+            ->filterWhere(['entries.id' => $attendee->eventId])
+            ->one();
+
+        if ($event->furtherRegistrationUrl ?? false) {
+            $notice = $notice . "<br /><br /><a target='_blank' href='{$event->furtherRegistrationUrl}'>Please visit this link to complete registration for this event.</a>";
+        }
         $message = "$notice<br /><br /><a href='/events/ical/{$attendee->eventId}'>Add this event to your calendar.</a>";
         Craft::$app->getSession()->setNotice($message);
 
-        return $this->redirectToPostedUrl();
+        return $redirect
+            ? $this->redirect($redirect)
+            : $this->redirectToPostedUrl();
     }
 
     /**

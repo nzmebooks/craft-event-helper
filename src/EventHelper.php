@@ -18,11 +18,13 @@ use nzmebooks\eventhelper\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
-use craft\services\Plugins;
-use craft\events\PluginEvent;
 use craft\web\UrlManager;
 use craft\web\twig\variables\CraftVariable;
 use craft\events\RegisterUrlRulesEvent;
+use craft\web\User;
+use craft\elements\User as UserElement;
+use craft\elements\Entry;
+use craft\errors\InvalidElementException;
 
 use yii\base\Event;
 
@@ -92,6 +94,109 @@ class EventHelper extends Plugin
                 /** @var CraftVariable $variable */
                 $variable = $event->sender;
                 $variable->set('eventHelper', EventHelperVariable::class);
+            }
+        );
+
+        // Listen for the EVENT_BEFORE_LOGIN event
+        // and check whether the user is logging in in order to RSVP to an event.
+        // If so, check if they are not active, and if so, activate them.
+        Event::on(
+            UserElement::class,
+            UserElement::EVENT_BEFORE_AUTHENTICATE,
+            function (\craft\events\AuthenticateUserEvent $userEvent) {
+                $post = Craft::$app->getRequest()->getBodyParams();
+                $loginName = $post['loginName'] ?? null;
+                $password = $post['password'] ?? null;
+
+                $user = Craft::$app->users->getUserByUsernameOrEmail($loginName);
+
+                if (!$user) {
+                    return;
+                }
+
+                if (!Craft::$app->getSecurity()->validatePassword($password, $user->password)) {
+                    return;
+                }
+
+                $eventId = $post['eventId'] ?? null;
+
+                if ($eventId) {
+                    // User is logging in to RSVP to an event
+                    // find the event
+                    $event = Entry::find()
+                        ->filterWhere(['entries.id' => $eventId])
+                        ->one();
+
+                    if ($event) {
+                        // Check if the user is inactive
+                        if ($user->status === UserElement::STATUS_INACTIVE || $user->status === UserElement::STATUS_SUSPENDED) {
+                            try {
+                                // Activate the user
+                                Craft::$app->getUsers()->activateUser($user);
+
+                                // Don't perform authentication, as we've just activated the user
+                                // and we know their password is good
+                                $userEvent->performAuthentication = false;
+                            } catch (InvalidElementException $e) {
+                                Craft::error("Failed to activate user during login with ID {$user->id}: " . implode(', ', $user->getErrorSummary(true)), __METHOD__);
+                                $userEvent->sender->authError = 'Failed to activate user during login.';
+
+                                return false;
+                            }
+
+                            Craft::info("User {$user->email} activated during login.", __METHOD__);
+                        }
+                        return true;
+                    }
+                }
+            }
+        );
+
+        // Listen for the EVENT_AFTER_LOGIN event
+        // and check whether the user is logging in in order to RSVP to an event.
+        // If so, mark them as attended.
+        Event::on(
+            User::class,
+            User::EVENT_AFTER_LOGIN,
+            function (\yii\web\UserEvent $userEvent) {
+                $post = Craft::$app->getRequest()->getBodyParams();
+                $eventId = $post['eventId'] ?? null;
+
+                if ($eventId) {
+                    // User is logging in to RSVP to an event
+                    // find the event
+                    $event = Entry::find()
+                        ->filterWhere(['entries.id' => $eventId])
+                        ->one();
+
+                    if ($event) {
+                        // Get the logged-in user
+                        $user = $userEvent->identity;
+
+                        Craft::$app->getRequest()->setBodyParams([
+                            Craft::$app->config->general->csrfTokenName => Craft::$app->request->getCsrfToken(), // Add CSRF token
+                            'redirect' => $event->url,
+                            'eventId' => $event->id,
+                            'userId' => $user->id,
+                            'name' => $user->fullName,
+                            'email' => $user->email,
+                            'seats' => 1,
+                        ]);
+
+                        Craft::$app->runAction('event-helper/attendees/save-attendee');
+                        Craft::$app->end();
+                    }
+
+                    $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
+
+                    $message = $eventsGlobals->rsvpFailure
+                    ? $eventsGlobals->rsvpFailure
+                    : 'Something wasn\'t right about your reservation. Try submitting it again.';
+
+                    Craft::$app->getSession()->setError($message);
+
+                    return $this->redirectToPostedUrl();
+                }
             }
         );
     }
