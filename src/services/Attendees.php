@@ -83,7 +83,7 @@ class Attendees extends Component
               $startDate = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
             }
 
-            if ($eventId && $startDate && $startDate < $dateNowUTCFormatted) {
+            if (!$eventId && $startDate && $startDate < $dateNowUTCFormatted) {
               unset($records[$index]);
               continue;
             }
