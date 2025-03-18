@@ -93,7 +93,7 @@ class Events extends Component
      *
      * @return mixed
      */
-    public function getEvents()
+    public function getEvents($id = null)
     {
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
         $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
@@ -109,7 +109,13 @@ class Events extends Component
             ->join('JOIN', 'entries AS entries', 'elements_sites.elementId = entries.id')
             ->join('JOIN', 'sections AS sections', 'entries.sectionId = sections.id')
             ->leftJoin('eventhelperattendees AS attendee', 'entries.id = attendee.eventId')
-            ->where('sections.handle = "events"')
+            ->where('sections.handle = "events"');
+
+        if ($id) {
+            $records = $records->andWhere(['entries.id' => $id]);
+        }
+
+        $records = $records
             ->groupBy('elements_sites.title')
             ->all();
 

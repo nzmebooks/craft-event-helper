@@ -45,7 +45,7 @@ class Attendees extends Component
      * @method getAttendees
      * @return array
      */
-    public function getAttendees()
+    public function getAttendees($eventId = null)
     {
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
         $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
@@ -58,7 +58,14 @@ class Attendees extends Component
             ')
             ->from('eventhelperattendees')
             ->leftJoin('entries AS entries', 'entries.id = eventhelperattendees.eventId')
-            ->join('JOIN', 'elements_sites', 'elements_sites.elementId = entries.id')
+            ->join('JOIN', 'elements_sites', 'elements_sites.elementId = entries.id');
+
+        if ($eventId) {
+            $records = $records
+                ->where('eventhelperattendees.eventId = ' . $eventId);
+        }
+
+        $records = $records
             ->all();
 
         // $builder = Craft::$app->getDb()->getQueryBuilder();

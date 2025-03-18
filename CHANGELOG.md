@@ -4,11 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.2.0 - 2025-03-18
+### Modified
+- Modify Events::getEvents to take an $id
+- Modify Attendees::getAttendees to take an $eventId
+
 ## 3.1.0 - 2025-03-16
 ### Modified
 - Allow users to RSVP during login
 - Allow users to reactivate themselves during login when RSVPing to an event
-
 
 ## 3.0.2 - 2024-09-01
 ### Modified
