@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.2.1 - 2025-03-18
+### Modified
+- In Attendees::getAttendees do not filter out attendees with a startDate < today if $eventId is supplied
+
 ## 3.2.0 - 2025-03-18
 ### Modified
 - Modify Events::getEvents to take an $id
