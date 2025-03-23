@@ -59,9 +59,9 @@ class EventHelperVariable
      *
      * @return Boolean
      */
-    public function isAttended($eventId, $userId)
+    public function isAttended($eventId)
     {
-        return EventHelper::$plugin->attendees->isAttended($eventId, $userId);
+        return EventHelper::$plugin->attendees->isAttended($eventId);
     }
 
     public function getEvents()

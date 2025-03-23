@@ -10,14 +10,11 @@
 
 namespace nzmebooks\eventhelper\services;
 
-use nzmebooks\eventhelper\EventHelper;
 use plainlanguage\plainIcs\variables\PlainIcsVariable;
 
-use Craft;
 use craft\base\Component;
 use craft\helpers\DateTimeHelper;
 use craft\db\Query;
-use DateTimeZone;
 
 /**
  * Class Events
@@ -126,10 +123,16 @@ class Events extends Component
           $content = json_decode($record['content'], true);
           $keys = array_keys($content);
 
+          $startDate = null;
           if (
             ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
           ) {
             $startDate = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+          }
+
+          if (!$startDate) {
+            unset($records[$index]);
+            continue;
           }
 
           if ($startDate && $startDate < $dateNowUTCFormatted) {

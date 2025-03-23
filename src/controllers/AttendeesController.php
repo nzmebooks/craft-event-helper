@@ -18,6 +18,7 @@ use craft\web\Controller;
 use craft\helpers\DateTimeHelper;
 use yii\web\Cookie;
 use craft\elements\Entry;
+use nystudio107\cookies\Cookies;
 
 /**
  * Class AttendeesController
@@ -28,6 +29,16 @@ use craft\elements\Entry;
  */
 class AttendeesController extends Controller
 {
+    // Protected Properties
+    // =========================================================================
+
+    /**
+     * @var    bool|array Allows anonymous access to this controller's actions.
+     *         The actions must be in 'kebab-case'
+     * @access protected
+     */
+    protected array|int|bool $allowAnonymous = ['remove-attendee'];
+
     // Public Methods
     // =========================================================================
 
@@ -119,6 +130,17 @@ class AttendeesController extends Controller
         $attendee->eventId = $this->getSanitisedBodyParam('eventId');
         $attendee->userId = $this->getSanitisedBodyParam('userId');
 
+        if (!$attendee->userId) {
+            // Check whether the user is already logged in
+            $attendee->userId = Craft::$app->getUser()->id;
+        }
+
+        $cookieName = 'user-registed-for-event-' . $attendee->eventId;
+        if (!$attendee->userId) {
+            // Check whether there is a cookie set for the eventId  -- the user may be logged out
+            $attendee->userId = Cookies::$plugin->cookies->get($cookieName);
+        }
+
         $eventsGlobals = Craft::$app->globals->getSetByHandle('events');
 
         if (!EventHelper::$plugin->attendees->RemoveAttendee($attendee)) {
@@ -133,6 +155,9 @@ class AttendeesController extends Controller
 
             return $this->redirectToPostedUrl();
         }
+
+        // Remove the associated cookie
+        Cookies::$plugin->cookies->set($cookieName);
 
         $message = $eventsGlobals->rsvpRemovalSuccess
             ? $eventsGlobals->rsvpRemovalSuccess

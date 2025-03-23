@@ -5,6 +5,7 @@
 
 {% set attendees = craft.eventHelper.getAttendees %}
 {% set events = craft.eventHelper.getEvents %}
+{% set cpTrigger = craft.app.config.general.cpTrigger %}
 
 {% block blockContent %}
 
@@ -30,9 +31,9 @@
                                 {% for attendee in attendees|slice(0, 500) %}
                                 <tr>
                                     <td>{{ attendee.id }}</td>
-                                    <td><a href="/admin/users/{{ attendee.userId }}">{{ attendee.name }}</a></td>
+                                    <td><a href="/{{ cpTrigger }}/users/{{ attendee.userId }}">{{ attendee.name }}</a></td>
                                     <td>{{ attendee.email }}</td>
-                                    <td><a href="/admin/entries/events/{{ attendee.eventId }}">{{ attendee.title }}</a></td>
+                                    <td><a href="/{{ cpTrigger }}/entries/events/{{ attendee.eventId }}">{{ attendee.title }}</a></td>
                                     <td>{{ attendee.dateCreated }}</td>
                                     <td>{{ attendee.seats }}</td>
                                 </tr>
@@ -80,7 +81,7 @@
                             <tbody>
                                 {% for event in events %}
                                 <tr>
-                                    <td><a href="/admin/entries/events/{{ event.id }}">{{ event.title }}</a></td>
+                                    <td><a href="/{{ cpTrigger }}/entries/events/{{ event.id }}">{{ event.title }}</a></td>
                                     <td class="thin">{{ event.attendance }}</td>
                                 </tr>
                                 {% endfor %}

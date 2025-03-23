@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.3.0 - 2025-03-23
+### Modified
+- allow remove-attendee to be called anonymously
+- set a cookie to show logged out user has RSVPed to event: 'user-registed-for-event-{eventId}';
+- use cpTrigger instead of 'admin' in templates
+- isAttended now only takes an $eventId, and will figure out the $userId
+
 ## 3.2.2 - 2025-03-18
 ### Modified
 - In Attendees::getAttendees do not filter out attendees with a startDate < today if $eventId is supplied

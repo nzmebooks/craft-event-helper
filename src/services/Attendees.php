@@ -18,10 +18,10 @@ use Craft;
 use craft\base\Component;
 use craft\helpers\DateTimeHelper;
 use craft\elements\Entry;
-use craft\web\View;
 use craft\mail\Message;
 use craft\db\Query;
-use DateTimeZone;
+use yii\web\Cookie;
+use nystudio107\cookies\Cookies;
 
 /**
  * Class Attendees
@@ -223,8 +223,22 @@ class Attendees extends Component
      * @method isAttended
      * @return Boolean
      */
-    public function isAttended($eventId, $userId)
+    public function isAttended($eventId, $userId = null)
     {
+        if (!$userId) {
+            // Check whether the user is already logged in
+            $userId = Craft::$app->getUser()->id;
+        }
+
+        if (!$userId) {
+            // Check whether there is a cookie set for the eventId  -- the user may be logged out
+            $userId = Cookies::$plugin->cookies->get('user-registed-for-event-' . $eventId);
+        }
+
+        if (!$userId) {
+            return false;
+        }
+
         $query = (new Query())
             ->select('
               eventhelperattendees.*,
@@ -343,7 +357,24 @@ class Attendees extends Component
             $record->setAttribute($key, $value);
         }
 
+        // Save a cookie indicating that the user has registered for this event
+        $this->setEventCookie($model->eventId, $model->userId);
+
         return $record->save();
+    }
+
+    public function setEventCookie($eventId, $userId)
+    {
+        $name = 'user-registed-for-event-' . $eventId;
+        $value = $userId;
+        $expire = time() + (86400 * 365); // 365 days
+        $path = '/';
+        $domain = Craft::$app->getRequest()->getHostName();
+        $secure = Craft::$app->getRequest()->getIsSecureConnection();
+        $httpOnly = true;
+        $sameSite = Cookie::SAME_SITE_LAX; // or Cookie::SAME_SITE_STRICT, Cookie::SAME_SITE_NONE
+
+        Cookies::$plugin->cookies->set($name, $value, $expire, $path, $domain, $secure, $httpOnly, $sameSite);
     }
 
     /**
