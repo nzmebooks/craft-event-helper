@@ -75,17 +75,55 @@ class Attendees extends Component
 
         foreach ($records as $index => $row) {
             $content = json_decode($row['content'], true);
-            $keys = array_keys($content);
 
-            if (
-              ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
-            ) {
-              $startDate = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
-            }
+            // Skip processing if an event ID was specified (we want all attendees regardless of date)
+            if (!$eventId) {
+                // Find all date fields in the content
+                $dateTimes = [];
+                foreach ($content as $uid => $value) {
+                    // Check if this is a date field (has a 'date' key with a string value)
+                    if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
+                        $dateTimes[$uid] = $value['date'];
+                    }
+                }
 
-            if (!$eventId && $startDate && $startDate < $dateNowUTCFormatted) {
-              unset($records[$index]);
-              continue;
+                // If we don't have any dates, skip this record but still include in results
+                if (!empty($dateTimes)) {
+                    // Sort dates chronologically
+                    asort($dateTimes);
+
+                    // Get the middle date (start date)
+                    $dateKeys = array_keys($dateTimes);
+                    $dateValues = array_values($dateTimes);
+
+                    // If we have 3 or more dates, get the middle one
+                    if (count($dateValues) >= 3) {
+                        $middleIndex = floor(count($dateValues) / 2);
+                        $startDate = $dateValues[$middleIndex];
+                    }
+                    // If we have 2 dates, get the first one (earlier date)
+                    else if (count($dateValues) == 2) {
+                        $startDate = $dateValues[0];
+                    }
+                    // If we have only 1 date, use that
+                    else {
+                        $startDate = $dateValues[0];
+                    }
+
+                    // If this event's start date is in the past, remove it
+                    if ($startDate < $dateNowUTCFormatted) {
+                        unset($records[$index]);
+                        continue;
+                    }
+
+                    // Store the resolved dates in the row for easier access
+                    $row['field_dateStart'] = $startDate;
+
+                    // If we have at least one more date after the start date, use it as the end date
+                    if (count($dateValues) > 1 && isset($dateValues[count($dateValues) - 1])) {
+                        $row['field_dateEnd'] = $dateValues[count($dateValues) - 1];
+                    }
+                }
             }
 
             $row['dateCreated'] = date_format(date_create($row['dateCreated']), "M d, Y");
@@ -130,24 +168,50 @@ class Attendees extends Component
 
         foreach ($records as $index => $row) {
             $content = json_decode($row['content'], true);
-            $keys = array_keys($content);
 
-            if (
-              ($keys[0] ?? null) && ($content[$keys[0]]['date'] ?? null)
-            ) {
-              $row['field_dateStart'] = isset($content[$keys[0]]) && is_array($content[$keys[0]]) ? $content[$keys[0]]['date'] : null;
-            } else {
-              if (
-                ($keys[2] ?? null) && ($content[$keys[2]]['date'] ?? null)
-              ) {
-                $row['field_dateStart'] = isset($content[$keys[2]]) && is_array($content[$keys[2]]) ? $content[$keys[2]]['date'] : null;
-              }
+            // Find all date fields in the content
+            $dateTimes = [];
+            foreach ($content as $uid => $value) {
+                // Check if this is a date field (has a 'date' key with a string value)
+                if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
+                    $dateTimes[$uid] = $value['date'];
+                }
             }
 
-            if (($row['field_dateStart'] ?? null) && $row['field_dateStart'] < $dateNowUTCFormatted) {
-              unset($records[$index]);
-              continue;
+            // If we don't have any dates, remove this record
+            if (empty($dateTimes)) {
+                unset($records[$index]);
+                continue;
             }
+
+            // Sort dates chronologically
+            asort($dateTimes);
+
+            // Get the middle date (start date)
+            $dateValues = array_values($dateTimes);
+
+            // If we have 3 or more dates, get the middle one
+            if (count($dateValues) >= 3) {
+                $middleIndex = floor(count($dateValues) / 2);
+                $startDate = $dateValues[$middleIndex];
+            }
+            // If we have 2 dates, get the first one (earlier date)
+            else if (count($dateValues) == 2) {
+                $startDate = $dateValues[0];
+            }
+            // If we have only 1 date, use that
+            else {
+                $startDate = $dateValues[0];
+            }
+
+            // If this event's start date is in the past, remove it
+            if ($startDate < $dateNowUTCFormatted) {
+                unset($records[$index]);
+                continue;
+            }
+
+            // Store the resolved dates in the row for easier access
+            $row['field_dateStart'] = $startDate;
 
             $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d H:i:s");
             unset($row['content']);
@@ -193,18 +257,50 @@ class Attendees extends Component
 
         foreach ($records as $index => $row) {
             $content = json_decode($row['content'], true);
-            $keys = array_keys($content);
 
-            if (
-              ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
-            ) {
-              $row['field_dateStart'] = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+            // Find all date fields in the content
+            $dateTimes = [];
+            foreach ($content as $uid => $value) {
+                // Check if this is a date field (has a 'date' key with a string value)
+                if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
+                    $dateTimes[$uid] = $value['date'];
+                }
             }
 
-            if (($row['field_dateStart'] ?? null) && $row['field_dateStart'] > $dateNowUTCFormatted) {
-              unset($records[$index]);
-              continue;
+            // If we don't have any dates, remove this record
+            if (empty($dateTimes)) {
+                unset($records[$index]);
+                continue;
             }
+
+            // Sort dates chronologically
+            asort($dateTimes);
+
+            // Get the middle date (start date)
+            $dateValues = array_values($dateTimes);
+
+            // If we have 3 or more dates, get the middle one
+            if (count($dateValues) >= 3) {
+                $middleIndex = floor(count($dateValues) / 2);
+                $startDate = $dateValues[$middleIndex];
+            }
+            // If we have 2 dates, get the first one (earlier date)
+            else if (count($dateValues) == 2) {
+                $startDate = $dateValues[0];
+            }
+            // If we have only 1 date, use that
+            else {
+                $startDate = $dateValues[0];
+            }
+
+            // For past attendees, we want to keep only those with start dates in the past
+            if ($startDate > $dateNowUTCFormatted) {
+                unset($records[$index]);
+                continue;
+            }
+
+            // Store the resolved dates in the row for easier access
+            $row['field_dateStart'] = $startDate;
 
             $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d H:i:s");
             unset($row['content']);

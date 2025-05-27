@@ -12,6 +12,7 @@ namespace nzmebooks\eventhelper\services;
 
 use plainlanguage\plainIcs\variables\PlainIcsVariable;
 
+use Craft;
 use craft\base\Component;
 use craft\helpers\DateTimeHelper;
 use craft\db\Query;
@@ -117,27 +118,59 @@ class Events extends Component
             ->all();
 
         // $builder = Craft::$app->getDb()->getQueryBuilder();
-        // die(var_dump($query->prepare($builder)->createCommand()->rawSql));
+        // die(var_dump($records->prepare($builder)->createCommand()->rawSql));
 
         foreach ($records as $index => $record) {
           $content = json_decode($record['content'], true);
-          $keys = array_keys($content);
 
-          $startDate = null;
-          if (
-            ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
-          ) {
-            $startDate = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+          // Find all date fields in the content
+          $dateTimes = [];
+          foreach ($content as $uid => $value) {
+              // Check if this is a date field (has a 'date' key with a string value)
+              if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
+                  $dateTimes[$uid] = $value['date'];
+              }
           }
 
-          if (!$startDate) {
-            unset($records[$index]);
-            continue;
+          // If we don't have any dates, remove this record
+          if (empty($dateTimes)) {
+              unset($records[$index]);
+              continue;
           }
 
-          if ($startDate && $startDate < $dateNowUTCFormatted) {
-            unset($records[$index]);
-            continue;
+          // Sort dates chronologically
+          asort($dateTimes);
+
+          // Get the middle date (start date)
+          $dateKeys = array_keys($dateTimes);
+          $dateValues = array_values($dateTimes);
+
+          // If we have 3 or more dates, get the middle one
+          if (count($dateValues) >= 3) {
+              $middleIndex = floor(count($dateValues) / 2);
+              $startDate = $dateValues[$middleIndex];
+          }
+          // If we have 2 dates, get the first one (earlier date)
+          else if (count($dateValues) == 2) {
+              $startDate = $dateValues[0];
+          }
+          // If we have only 1 date, use that
+          else {
+              $startDate = $dateValues[0];
+          }
+
+          // If this event's start date is in the past, remove it
+          if ($startDate < $dateNowUTCFormatted) {
+              unset($records[$index]);
+              continue;
+          }
+
+          // Store the resolved dates in the record for easier access
+          $record['field_dateStart'] = $startDate;
+
+          // If we have at least one more date after the start date, use it as the end date
+          if (count($dateValues) > 1 && isset($dateValues[count($dateValues) - 1])) {
+              $record['field_dateEnd'] = $dateValues[count($dateValues) - 1];
           }
         }
 
@@ -174,23 +207,55 @@ class Events extends Component
 
         foreach ($records as $index => $record) {
           $content = json_decode($record['content'], true);
-          $keys = array_keys($content);
 
-          if (
-            ($keys[1] ?? null) && ($content[$keys[1]]['date'] ?? null)
-          ) {
-            $record['field_dateStart'] = isset($content[$keys[1]]) && is_array($content[$keys[1]]) ? $content[$keys[1]]['date'] : null;
+          // Find all date fields in the content
+          $dateTimes = [];
+          foreach ($content as $uid => $value) {
+              // Check if this is a date field (has a 'date' key with a string value)
+              if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
+                  $dateTimes[$uid] = $value['date'];
+              }
           }
 
-          if (
-            ($keys[2] ?? null) && ($content[$keys[2]]['date'] ?? null)
-          ) {
-            $record['field_dateEnd'] = isset($content[$keys[2]]) && is_array($content[$keys[2]]) ? $content[$keys[2]]['date'] : null;
+          // If we don't have any dates, remove this record
+          if (empty($dateTimes)) {
+              unset($records[$index]);
+              continue;
           }
 
-          if (($record['field_dateStart'] ?? null) && $record['field_dateStart'] < $dateNowUTCFormatted) {
-            unset($records[$index]);
-            continue;
+          // Sort dates chronologically
+          asort($dateTimes);
+
+          // Get the middle date (start date)
+          $dateKeys = array_keys($dateTimes);
+          $dateValues = array_values($dateTimes);
+
+          // If we have 3 or more dates, get the middle one
+          if (count($dateValues) >= 3) {
+              $middleIndex = floor(count($dateValues) / 2);
+              $startDate = $dateValues[$middleIndex];
+          }
+          // If we have 2 dates, get the first one (earlier date)
+          else if (count($dateValues) == 2) {
+              $startDate = $dateValues[0];
+          }
+          // If we have only 1 date, use that
+          else {
+              $startDate = $dateValues[0];
+          }
+
+          // If this event's start date is in the past, remove it
+          if ($startDate < $dateNowUTCFormatted) {
+              unset($records[$index]);
+              continue;
+          }
+
+          // Store the resolved dates in the record for easier access
+          $record['field_dateStart'] = $startDate;
+
+          // If we have at least one more date after the start date, use it as the end date
+          if (count($dateValues) > 1 && isset($dateValues[count($dateValues) - 1])) {
+              $record['field_dateEnd'] = $dateValues[count($dateValues) - 1];
           }
         }
 
