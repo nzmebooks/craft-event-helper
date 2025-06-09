@@ -126,8 +126,8 @@ class Attendees extends Component
                 }
             }
 
-            $row['dateCreated'] = date_format(date_create($row['dateCreated']), "M d, Y");
-            $row['dateUpdated'] = date_format(date_create($row['dateUpdated']), "M d, Y");
+            $row['dateCreated'] = Craft::$app->getFormatter()->asDatetime($row['dateCreated'], 'php:M d, Y');
+            $row['dateUpdated'] = Craft::$app->getFormatter()->asDatetime($row['dateUpdated'], 'php:M d, Y');
 
             $data[] = $row;
         }
@@ -213,7 +213,7 @@ class Attendees extends Component
             // Store the resolved dates in the row for easier access
             $row['field_dateStart'] = $startDate;
 
-            $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d H:i:s");
+            $row['dateCreated'] = Craft::$app->getFormatter()->asDatetime($row['dateCreated'], 'php:Y-m-d H:i:s');
             unset($row['content']);
 
             $data[] = $row;
@@ -302,7 +302,7 @@ class Attendees extends Component
             // Store the resolved dates in the row for easier access
             $row['field_dateStart'] = $startDate;
 
-            $row['dateCreated'] = date_format(date_create($row['dateCreated']), "Y-m-d H:i:s");
+            $row['dateCreated'] = Craft::$app->getFormatter()->asDatetime($row['dateCreated'], 'php:Y-m-d H:i:s');
             unset($row['content']);
 
             $data[] = $row;

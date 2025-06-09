@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.5.0 - 2025-06-09
+### Modified
+- Ensure attendee dates are presented in local datetime, not UTC
+
 ## 3.4.0 - 2025-05-27
 ### Modified
 - refactor logic to determine the event start date, as the content field dates may be in any order
