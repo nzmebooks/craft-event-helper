@@ -484,9 +484,38 @@ class Attendees extends Component
     {
         $record = new AttendeeRecord();
 
-        return $record->deleteAll([
-            'userId' => $model->userId,
-            'eventId' => $model->eventId,
-        ]);
+        if ($model->eventId) {
+            $deleted = $record->deleteAll([
+                'userId' => $model->userId,
+                'eventId' => $model->eventId,
+            ]);
+
+            if ($deleted > 0) {
+                // Remove the cookie indicating that the user has registered for this event
+                $cookieName = 'user-registed-for-event-' . $model->eventId;
+                Cookies::$plugin->cookies->set($cookieName);
+            }
+        } else {
+            // First, get all event IDs for this user before deleting
+            $eventIds = (new Query())
+                ->select('eventId')
+                ->from('eventhelperattendees')
+                ->where(['userId' => $model->userId])
+                ->column();
+
+            $deleted = $record->deleteAll([
+                'userId' => $model->userId,
+            ]);
+
+            if ($deleted > 0 && !empty($eventIds)) {
+                // Remove all cookies for events this user was registered for
+                foreach ($eventIds as $eventId) {
+                    $cookieName = 'user-registed-for-event-' . $eventId;
+                    Cookies::$plugin->cookies->set($cookieName);
+                }
+            }
+        }
+
+        return $deleted;
     }
 }

@@ -15,6 +15,7 @@ use nzmebooks\eventhelper\services\EventHelperService;
 use nzmebooks\eventhelper\services\Attendees;
 use nzmebooks\eventhelper\services\Events;
 use nzmebooks\eventhelper\models\Settings;
+use nzmebooks\eventhelper\models\AttendeeModel;
 
 use Craft;
 use craft\base\Plugin;
@@ -196,6 +197,25 @@ class EventHelper extends Plugin
                     Craft::$app->getSession()->setError($message);
 
                     return $this->redirectToPostedUrl();
+                }
+            }
+        );
+
+        // Listen for user deletion events to clean up eventhelperattendees table
+        Event::on(
+            UserElement::class,
+            UserElement::EVENT_BEFORE_DELETE,
+            function (Event $event) {
+                $user = $event->sender;
+                $userId = $user->id;
+
+                $attendee = new AttendeeModel();
+                $attendee->userId = $userId;
+
+                $deleted = EventHelper::$plugin->attendees->removeAttendee($attendee);
+
+                if ($deleted > 0) {
+                    Craft::info("Deleted {$deleted} attendee record(s) for user ID {$userId} ({$user->email}) during user deletion.", __METHOD__);
                 }
             }
         );
