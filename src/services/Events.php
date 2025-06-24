@@ -120,15 +120,21 @@ class Events extends Component
         // $builder = Craft::$app->getDb()->getQueryBuilder();
         // die(var_dump($records->prepare($builder)->createCommand()->rawSql));
 
-        foreach ($records as $index => $record) {
+        foreach ($records as $index => &$record) {
           $content = json_decode($record['content'], true);
 
-          // Find all date fields in the content
+          // Find all date fields in the content and the event code
           $dateTimes = [];
+          $eventCode = null;
           foreach ($content as $uid => $value) {
               // Check if this is a date field (has a 'date' key with a string value)
               if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
                   $dateTimes[$uid] = $value['date'];
+              }
+
+              // Look for event code (short string, likely all caps or alphanumeric)
+              if (is_string($value) && preg_match('/^[A-Z0-9]{2,10}$/', $value)) {
+                  $eventCode = $value;
               }
           }
 
@@ -165,12 +171,17 @@ class Events extends Component
               continue;
           }
 
-          // Store the resolved dates in the record for easier access
+          // Store the resolved dates and event code in the record for easier access
           $record['field_dateStart'] = $startDate;
 
           // If we have at least one more date after the start date, use it as the end date
           if (count($dateValues) > 1 && isset($dateValues[count($dateValues) - 1])) {
               $record['field_dateEnd'] = $dateValues[count($dateValues) - 1];
+          }
+
+          // Store the event code if found
+          if ($eventCode) {
+              $record['field_eventCode'] = $eventCode;
           }
         }
 
@@ -205,15 +216,21 @@ class Events extends Component
             ->limit($limit)
             ->all();
 
-        foreach ($records as $index => $record) {
+        foreach ($records as $index => &$record) {
           $content = json_decode($record['content'], true);
 
-          // Find all date fields in the content
+          // Find all date fields in the content and the event code
           $dateTimes = [];
+          $eventCode = null;
           foreach ($content as $uid => $value) {
               // Check if this is a date field (has a 'date' key with a string value)
               if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
                   $dateTimes[$uid] = $value['date'];
+              }
+
+              // Look for event code (short string, likely all caps or alphanumeric)
+              if (is_string($value) && preg_match('/^[A-Z0-9]{2,10}$/', $value)) {
+                  $eventCode = $value;
               }
           }
 
@@ -250,12 +267,17 @@ class Events extends Component
               continue;
           }
 
-          // Store the resolved dates in the record for easier access
+          // Store the resolved dates and event code in the record for easier access
           $record['field_dateStart'] = $startDate;
 
           // If we have at least one more date after the start date, use it as the end date
           if (count($dateValues) > 1 && isset($dateValues[count($dateValues) - 1])) {
               $record['field_dateEnd'] = $dateValues[count($dateValues) - 1];
+          }
+
+          // Store the event code if found
+          if ($eventCode) {
+              $record['field_eventCode'] = $eventCode;
           }
         }
 
