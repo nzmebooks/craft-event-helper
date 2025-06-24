@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.7.0 - 2025-06-24
+### Modified
+- Ensure field_eventCode is populated
+
 ## 3.6.0 - 2025-06-11
 ### Modified
 - Ensure associated attendee records are deleted when user is deleted
