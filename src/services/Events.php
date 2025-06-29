@@ -96,93 +96,49 @@ class Events extends Component
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
         $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
-        $records = (new Query())
-            ->select('
-                entries.id,
-                elements_sites.title,
-                elements_sites.content,
-                COUNT(attendee.seats) AS attendance'
-            )
+        $db = Craft::$app->getDb();
+
+        $query = (new Query())
+            ->select([
+                'entries.id',
+                'elements_sites.title',
+                'COUNT(attendee.seats) AS attendance',
+                'JSON_UNQUOTE(JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateStart.layoutElementUid, \'.date\'))) AS field_dateStart',
+                'JSON_UNQUOTE(JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateEnd.layoutElementUid, \'.date\'))) AS field_dateEnd',
+                'JSON_UNQUOTE(JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfEventCode.layoutElementUid))) AS field_eventCode'
+            ])
             ->from('elements_sites')
             ->join('JOIN', 'entries AS entries', 'elements_sites.elementId = entries.id')
             ->join('JOIN', 'sections AS sections', 'entries.sectionId = sections.id')
+            ->join('JOIN', 'changedfields AS cfDateStart', 'cfDateStart.elementId = entries.id')
+            ->join('JOIN', 'fields AS fDateStart', 'cfDateStart.fieldId = fDateStart.id AND fDateStart.handle = "dateStart"')
+            ->join('JOIN', 'changedfields AS cfDateEnd', 'cfDateEnd.elementId = entries.id')
+            ->join('JOIN', 'fields AS fDateEnd', 'cfDateEnd.fieldId = fDateEnd.id AND fDateEnd.handle = "dateEnd"')
+            ->join('JOIN', 'changedfields AS cfEventCode', 'cfEventCode.elementId = entries.id')
+            ->join('JOIN', 'fields AS fEventCode', 'cfEventCode.fieldId = fEventCode.id AND fEventCode.handle = "eventCode"')
             ->leftJoin('eventhelperattendees AS attendee', 'entries.id = attendee.eventId')
-            ->where('sections.handle = "events"');
+            ->where('sections.handle = "events"')
+            ->andWhere('JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateStart.layoutElementUid, \'.date\')) IS NOT NULL')
+            ->andWhere(['>=', 'JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateStart.layoutElementUid, \'.date\'))', $dateNowUTCFormatted]);
 
         if ($id) {
-            $records = $records->andWhere(['entries.id' => $id]);
+            $query->andWhere(['entries.id' => $id]);
         }
 
-        $records = $records
-            ->groupBy('elements_sites.title')
-            ->all();
-
+        // $records = $query
+        //     ->groupBy('elements_sites.title');
         // $builder = Craft::$app->getDb()->getQueryBuilder();
         // die(var_dump($records->prepare($builder)->createCommand()->rawSql));
 
-        foreach ($records as $index => &$record) {
-          $content = json_decode($record['content'], true);
+        $records = $query
+            ->groupBy('elements_sites.title')
+            ->all();
 
-          // Find all date fields in the content and the event code
-          $dateTimes = [];
-          $eventCode = null;
-          foreach ($content as $uid => $value) {
-              // Check if this is a date field (has a 'date' key with a string value)
-              if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
-                  $dateTimes[$uid] = $value['date'];
-              }
-
-              // Look for event code (short string, likely all caps or alphanumeric)
-              if (is_string($value) && preg_match('/^[A-Z0-9]{2,10}$/', $value)) {
-                  $eventCode = $value;
-              }
-          }
-
-          // If we don't have any dates, remove this record
-          if (empty($dateTimes)) {
-              unset($records[$index]);
-              continue;
-          }
-
-          // Sort dates chronologically
-          asort($dateTimes);
-
-          // Get the middle date (start date)
-          $dateKeys = array_keys($dateTimes);
-          $dateValues = array_values($dateTimes);
-
-          // If we have 3 or more dates, get the middle one
-          if (count($dateValues) >= 3) {
-              $middleIndex = floor(count($dateValues) / 2);
-              $startDate = $dateValues[$middleIndex];
-          }
-          // If we have 2 dates, get the first one (earlier date)
-          else if (count($dateValues) == 2) {
-              $startDate = $dateValues[0];
-          }
-          // If we have only 1 date, use that
-          else {
-              $startDate = $dateValues[0];
-          }
-
-          // If this event's start date is in the past, remove it
-          if ($startDate < $dateNowUTCFormatted) {
-              unset($records[$index]);
-              continue;
-          }
-
-          // Store the resolved dates and event code in the record for easier access
-          $record['field_dateStart'] = $startDate;
-
-          // If we have at least one more date after the start date, use it as the end date
-          if (count($dateValues) > 1 && isset($dateValues[count($dateValues) - 1])) {
-              $record['field_dateEnd'] = $dateValues[count($dateValues) - 1];
-          }
-
-          // Store the event code if found
-          if ($eventCode) {
-              $record['field_eventCode'] = $eventCode;
-          }
+        // Set empty eventCode for records that don't have one
+        foreach ($records as &$record) {
+            if (!isset($record['field_eventCode']) || $record['field_eventCode'] === null) {
+                $record['field_eventCode'] = '';
+            }
         }
 
         return $records;
@@ -200,85 +156,41 @@ class Events extends Component
         $dateNowUTC = DateTimeHelper::currentUTCDateTime();
         $dateNowUTCFormatted = $dateNowUTC->format('Y-m-d H:i:s');
 
-        $records = (new Query())
-            ->select('
-              entries.id,
-              elements_sites.title,
-              elements_sites.content'
-            )
+        $db = Craft::$app->getDb();
+
+        $query = (new Query())
+            ->select([
+                'entries.id',
+                'elements_sites.title',
+                'JSON_UNQUOTE(JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateStart.layoutElementUid, \'.date\'))) AS field_dateStart',
+                'JSON_UNQUOTE(JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateEnd.layoutElementUid, \'.date\'))) AS field_dateEnd',
+                'JSON_UNQUOTE(JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfEventCode.layoutElementUid))) AS field_eventCode'
+            ])
             ->from('elements_sites')
             ->join('JOIN', 'entries AS entries', 'elements_sites.elementId = entries.id')
             ->join('JOIN','sections AS sections', 'entries.sectionId = sections.id')
+            ->join('JOIN', 'changedfields AS cfDateStart', 'cfDateStart.elementId = entries.id')
+            ->join('JOIN', 'fields AS fDateStart', 'cfDateStart.fieldId = fDateStart.id AND fDateStart.handle = "dateStart"')
+            ->join('JOIN', 'changedfields AS cfDateEnd', 'cfDateEnd.elementId = entries.id')
+            ->join('JOIN', 'fields AS fDateEnd', 'cfDateEnd.fieldId = fDateEnd.id AND fDateEnd.handle = "dateEnd"')
+            ->join('JOIN', 'changedfields AS cfEventCode', 'cfEventCode.elementId = entries.id')
+            ->join('JOIN', 'fields AS fEventCode', 'cfEventCode.fieldId = fEventCode.id AND fEventCode.handle = "eventCode"')
             ->join('JOIN','relations AS relations', 'entries.id = relations.sourceId')
             ->join('JOIN','elements_sites AS relatedContent', 'relatedContent.elementId = relations.targetId')
             ->where('sections.handle = "events"')
             ->andWhere("relatedContent.title = '$categoryTitle'")
+            ->andWhere('JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateStart.layoutElementUid, \'.date\')) IS NOT NULL')
+            ->andWhere(['>=', 'JSON_EXTRACT(elements_sites.content, CONCAT(\'$.\', cfDateStart.layoutElementUid, \'.date\'))', $dateNowUTCFormatted]);
+
+        $records = $query
             ->limit($limit)
             ->all();
 
-        foreach ($records as $index => &$record) {
-          $content = json_decode($record['content'], true);
-
-          // Find all date fields in the content and the event code
-          $dateTimes = [];
-          $eventCode = null;
-          foreach ($content as $uid => $value) {
-              // Check if this is a date field (has a 'date' key with a string value)
-              if (is_array($value) && isset($value['date']) && is_string($value['date'])) {
-                  $dateTimes[$uid] = $value['date'];
-              }
-
-              // Look for event code (short string, likely all caps or alphanumeric)
-              if (is_string($value) && preg_match('/^[A-Z0-9]{2,10}$/', $value)) {
-                  $eventCode = $value;
-              }
-          }
-
-          // If we don't have any dates, remove this record
-          if (empty($dateTimes)) {
-              unset($records[$index]);
-              continue;
-          }
-
-          // Sort dates chronologically
-          asort($dateTimes);
-
-          // Get the middle date (start date)
-          $dateKeys = array_keys($dateTimes);
-          $dateValues = array_values($dateTimes);
-
-          // If we have 3 or more dates, get the middle one
-          if (count($dateValues) >= 3) {
-              $middleIndex = floor(count($dateValues) / 2);
-              $startDate = $dateValues[$middleIndex];
-          }
-          // If we have 2 dates, get the first one (earlier date)
-          else if (count($dateValues) == 2) {
-              $startDate = $dateValues[0];
-          }
-          // If we have only 1 date, use that
-          else {
-              $startDate = $dateValues[0];
-          }
-
-          // If this event's start date is in the past, remove it
-          if ($startDate < $dateNowUTCFormatted) {
-              unset($records[$index]);
-              continue;
-          }
-
-          // Store the resolved dates and event code in the record for easier access
-          $record['field_dateStart'] = $startDate;
-
-          // If we have at least one more date after the start date, use it as the end date
-          if (count($dateValues) > 1 && isset($dateValues[count($dateValues) - 1])) {
-              $record['field_dateEnd'] = $dateValues[count($dateValues) - 1];
-          }
-
-          // Store the event code if found
-          if ($eventCode) {
-              $record['field_eventCode'] = $eventCode;
-          }
+        // Set empty eventCode for records that don't have one
+        foreach ($records as &$record) {
+            if (!isset($record['field_eventCode']) || $record['field_eventCode'] === null) {
+                $record['field_eventCode'] = '';
+            }
         }
 
         return $records;

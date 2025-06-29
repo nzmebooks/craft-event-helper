@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 3.8.0 - 2025-06-29
+### Modified
+- Refactored the event query to handle date and event code fields directly in the database query.
+
 ## 3.7.0 - 2025-06-24
 ### Modified
 - Ensure field_eventCode is populated
